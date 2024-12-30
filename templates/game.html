@@ -3009,7 +3009,7 @@ function saveGameData(data, isPostShock = false) {
             } else {
                 // For non-localhost, send data via API request
                 const apiBaseUrl = getApiBaseUrl();
-                axios.post(`${apiBaseUrl}/api/saveGameData`, dataToSave) // Use backticks for template literals
+                axios.post(`${apiBaseUrl}/api/save-game-data`, dataToSave) // Use backticks for template literals
                     .then(response => resolve(response.data))
                     .catch(error => reject(error));
             }
