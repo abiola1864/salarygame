@@ -1728,17 +1728,8 @@ function showEarningsBreakdown(preShockCategorySum, speedBonus) {
 
 
 function getApiBaseUrl() {
-    // For local development
-    if (process.env.NODE_ENV === 'development') {
-        return 'http://localhost:3000';
-    }
-    
-    // For browser-side code (works for both production and preview)
-    if (typeof window !== 'undefined') {
-        return window.location.origin;
-    }
-    
-    return 'http://localhost:3040';
+    const isLocalhost = window.location.hostname === 'localhost';
+    return isLocalhost ? 'http://localhost:3000' : window.location.origin;
 }
 
 
@@ -3001,40 +2992,35 @@ function getStageData(stageName) {
 //     });
 // }
 
-
-
 function saveGameData(data, isPostShock = false) {
     return new Promise((resolve, reject) => {
         try {
+            // Create dataToSave object with the additional 'dataType' field
             const dataToSave = {
                 ...data,
-                is_post_shock: isPostShock // Use is_post_shock to match MongoDB schema
+                dataType: isPostShock ? "post-shock" : "pre-shock"
             };
 
+            // If running locally, save the data in localStorage
             if (window.location.hostname === 'localhost') {
-                // For local development
                 localStorage.setItem('gameData', JSON.stringify(dataToSave));
-                console.log(`${isPostShock ? 'Post' : 'Pre'}-shock data saved locally:`, dataToSave);
+                console.log('Data saved locally:', dataToSave);
                 resolve({ status: 'success', message: 'Saved locally' });
             } else {
-                // For production environment
+                // For non-localhost, send data via API request
                 const apiBaseUrl = getApiBaseUrl();
-                axios.post(`${apiBaseUrl}/api/saveGameData`, dataToSave)
-                    .then(response => {
-                        console.log(`${isPostShock ? 'Post' : 'Pre'}-shock data saved to server:`, response.data);
-                        resolve(response.data);
-                    })
-                    .catch(error => {
-                        console.error(`Failed to save ${isPostShock ? 'post' : 'pre'}-shock data:`, error);
-                        reject(error);
-                    });
+                axios.post(`${apiBaseUrl}/api/saveGameData`, dataToSave) // Use backticks for template literals
+                    .then(response => resolve(response.data))
+                    .catch(error => reject(error));
             }
         } catch (error) {
-            console.error('Error in saveGameData:', error);
+            // Handle any unexpected errors
             reject(error);
         }
     });
 }
+
+      
 
 
     </script>
