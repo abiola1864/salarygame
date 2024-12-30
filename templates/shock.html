@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Happens! - Financial Shock</title>
+    <style>
+        .shock-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .shock-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+        .shock-boxes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .shock-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .shock-box:hover {
+            transform: translateY(-5px);
+            border-color: #007bff;
+        }
+        .shock-box.revealed {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .shock-amount {
+            font-size: 1.5em;
+            color: #dc3545;
+            margin-top: 10px;
+        }
+        .warning {
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+    </style>
+</head>
+<body>
+    <div id="shockEvent" class="shock-container">
+        <div class="shock-content">
+            <h2>Life Happens! 😮</h2>
+            <p>Click one box to reveal your financial challenge...</p>
+            
+            <div class="shock-boxes">
+                <div class="shock-box" onclick="revealShock(this, 0)">
+                    <span>?</span>
+                </div>
+                <div class="shock-box" onclick="revealShock(this, 1)">
+                    <span>?</span>
+                </div>
+                <div class="shock-box" onclick="revealShock(this, 2)">
+                    <span>?</span>
+                </div>
+            </div>
+            
+            <button id="continueButton" style="display: none;" onclick="continueGame()">
+                Continue Game
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SHOCK_EVENTS = [
+            { text: "Surprise! Your friend's birthday party is tomorrow. Time to buy a gift! 🎁", amount: 1500 },
+            { text: "PHCN has disconnected your electricity without notice. Emergency reconnection needed! ⚡", amount: 2000 },
+            { text: "Your phone screen cracked. Quick repair needed for work! 📱", amount: 1800 },
+            { text: "Unexpected transportation fare increase this week! 🚌", amount: 1200 },
+            { text: "Emergency medical consultation needed! 🏥", amount: 1700 },
+            { text: "Surprise family visit - need to stock up on groceries! 🛒", amount: 1300 },
+            { text: "Your favorite food vendor increased prices! 🍲", amount: 1100 },
+            { text: "Water supply issues - need to buy from water truck! 💧", amount: 1600 }
+        ];
+
+        let selectedEvents = [];
+        let shockAmount = 0;
+
+       // Replace the existing showShockEvent function with this:
+function showShockEvent() {
+    // Randomly select 3 unique events
+    selectedEvents = SHOCK_EVENTS
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3);
+    
+    // Show the shock event overlay
+    document.getElementById('shockEvent').style.display = 'flex';
+}
+
+
+
+
+
+        function revealShock(box, index) {
+            if (!box.classList.contains('revealed')) {
+                const event = selectedEvents[index];
+                box.innerHTML = `
+                    <div>
+                        <p>${event.text}</p>
+                        <div class="shock-amount">-₦${event.amount}</div>
+                    </div>
+                `;
+                box.classList.add('revealed');
+                shockAmount = event.amount;
+                
+                // Disable other boxes
+                document.querySelectorAll('.shock-box').forEach(b => {
+                    b.style.pointerEvents = 'none';
+                });
+                
+                document.getElementById('continueButton').style.display = 'block';
+            }
+        }
+
+ 
+
+        unction updateAmountDisplays() {
+    // Get the shock amount from stage data
+    const currentStageData = stageData[currentStage] || {};
+    const currentShockAmount = currentStageData.shockAmount || 0;
+
+    // Update available amount display
+    document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+    
+    // Calculate current spent amount from inputs plus shock amount
+    const inputs = document.querySelectorAll('input[type="number"]');
+    let spent = currentShockAmount; // Start with shock amount
+    inputs.forEach(input => {
+        spent += parseInt(input.value) || 0;
+    });
+    document.getElementById('spent-amount').textContent = `${spent.toLocaleString()} NGN`;
+    
+    // Calculate and update remaining amount
+    const remaining = totalAmount - spent;
+    document.getElementById('remaining-amount').textContent = `${remaining.toLocaleString()} NGN`;
+    
+    // Update progress bar
+    const percentage = (spent / totalAmount) * 100;
+    document.getElementById('progress').style.width = `${Math.min(percentage, 100)}%`;
+
+    // Add visual warning if overspent
+    if (remaining < 0) {
+        document.getElementById('remaining-amount').style.color = 'red';
+        document.getElementById('remaining-amount').classList.add('warning');
+        document.getElementById('submit-button').disabled = true;
+    } else {
+        document.getElementById('remaining-amount').style.color = '';
+        document.getElementById('remaining-amount').classList.remove('warning');
+        document.getElementById('submit-button').disabled = false;
+    }
+}
+
+
+
+     
+
+function continueGame() {
+    if (shockAmount > 0) {
+        // Store current input values before applying shock
+        const currentInputs = {};
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            currentInputs[input.id] = input.value || '0';
+        });
+
+        // Update total amount by subtracting shock amount
+        totalAmount -= shockAmount;
+        
+        // Store the shock amount and previous inputs in the stage data
+        stageData[currentStage] = {
+            ...stageData[currentStage],
+            totalAmount: totalAmount,
+            shockAmount: shockAmount,
+            previousInputs: currentInputs
+        };
+        localStorage.setItem('stageData', JSON.stringify(stageData));
+        
+        // Restore previous input values
+        Object.entries(currentInputs).forEach(([inputId, value]) => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.value = value;
+            }
+        });
+        
+        // Update all displays including the shock amount
+        updateAmountDisplays();
+        
+        // Show message about required adjustment
+        alert(`An unexpected expense of ${shockAmount.toLocaleString()} NGN has occurred.\n\nYour new available amount is ${totalAmount.toLocaleString()} NGN.\n\nPlease adjust your spending to account for this reduction.`);
+        
+        // Hide shock overlay
+        document.getElementById('shockEvent').style.display = 'none';
+    } else {
+        // No shock or zero amount shock - proceed to next stage
+        document.getElementById('shockEvent').style.display = 'none';
+        proceedToNextStage();
+    }
+}
+
+
+function updateInterface() {
+    const stage = STAGES[currentStage];
+    
+    // Check if we have stored data for this stage
+    const storedData = stageData[currentStage];
+    if (storedData && storedData.totalAmount) {
+        totalAmount = storedData.totalAmount;
+        
+        // Restore previous input values if they exist
+        if (storedData.previousInputs) {
+            Object.entries(storedData.previousInputs).forEach(([inputId, value]) => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = value;
+                }
+            });
+        }
+    } else {
+        totalAmount = (stage.base_salary || 0) + (stage.additional_payment || 0);
+    }
+    
+    // Rest of your existing updateInterface code...
+    document.getElementById('scenario-title').textContent = stage.title;
+    document.getElementById('scenario-description').textContent = stage.description;
+
+    if (currentStage === 'condition_b') {
+        document.getElementById('split-view').style.display = 'grid';
+        document.getElementById('regular-view').style.display = 'none';
+        setupSplitView();
+    } else {
+        document.getElementById('split-view').style.display = 'none';
+        document.getElementById('regular-view').style.display = 'block';
+        
+        // Update all amount displays
+        updateAmountDisplays();
+        
+        // Refresh spending categories
+        Object.keys(SPENDING_CATEGORIES).forEach(categoryKey => {
+            const gridElement = document.getElementById(`${categoryKey}-grid`);
+            gridElement.innerHTML = '';
+            getRandomItems(categoryKey, 2).forEach(item => {
+                gridElement.appendChild(createItemRow(item, categoryKey));
+            });
+        });
+    }
+
+    // Update stage indicators
+    document.querySelectorAll('.stage-dot').forEach((dot, index) => {
+        const stageName = Object.keys(STAGES)[index];
+        dot.classList.toggle('active', stageName === currentStage);
+        dot.classList.toggle('completed', Object.keys(STAGES).indexOf(stageName) < Object.keys(STAGES).indexOf(currentStage));
+    });
+    
+    startTimer();
+}
+
+
+
+
+
+function updateAmount() {
+    if (currentStage === 'condition_b') {
+        updateSplitAmount();
+    } else {
+        updateRegularAmount();
+    }
+}
+
+function updateRegularAmount() {
+    const inputs = document.querySelectorAll('input[type="number"]');
+    let spent = 0;
+    inputs.forEach(input => {
+        const value = parseInt(input.value) || 0;
+        spent += value;
+        
+        // Real-time validation
+        if (spent > totalAmount) {
+            input.classList.add('error');
+            document.getElementById('submit-button').disabled = true;
+            document.getElementById('remaining-amount').style.color = 'red';
+            document.getElementById('remaining-amount').classList.add('warning');
+        } else {
+            input.classList.remove('error');
+            document.getElementById('submit-button').disabled = false;
+            document.getElementById('remaining-amount').style.color = '';
+            document.getElementById('remaining-amount').classList.remove('warning');
+        }
+    });
+    
+    document.getElementById('spent-amount').textContent = `${spent.toLocaleString()} NGN`;
+    document.getElementById('remaining-amount').textContent = `${(totalAmount - spent).toLocaleString()} NGN`;
+    
+    const percentage = (spent / totalAmount) * 100;
+    document.getElementById('progress').style.width = `${Math.min(percentage, 100)}%`;
+}
+    </script>
+</body>
+</html>

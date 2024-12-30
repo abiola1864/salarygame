@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Selection</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 16px 0;
+        }
+
+        .instruction {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .category-section {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-grid {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: 1fr;
+        }
+
+        .item-checkbox {
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            gap: 12px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+        }
+
+        label {
+            font-size: 0.95rem;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .continue-btn {
+            width: 100%;
+            height: 48px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+
+        .continue-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+            }
+            .item-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 900px;
+            }
+            .item-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <form id="categoryForm">
+        <div class="container">
+            <div class="header">
+                <h1>Select Your Categories</h1>
+                <div class="instruction">🌟 Choose exactly 4 items from each category</div>
+                <div class="instruction">🛍️ These will shape your spending strategy</div>
+                <div class="instruction">🤖 Computer will randomly pick 2 items when the game starts</div>
+                <div class="instruction">💡 Selections may change during the game but will always be within the four items you choose here.</div>
+            </div>
+            <div id="categories-container"></div>
+            <button type="submit" id="continueButton" class="continue-btn" disabled>Continue to Game</button>
+        </div>
+    </form>
+
+    <script>
+        const SPENDING_CATEGORIES = {
+            essentials: {
+                name: "Daily Needs",
+                icon: "🛍️",
+                items: [
+                    { name: "Food Stuffs", icon: "🍲" },
+                    { name: "Groceries", icon: "🍲" },
+                    { name: "Clothing", icon: "👕" },
+                    { name: "Childcare Expenses", icon: "🍼" },
+                    { name: "School Fees", icon: "🎓" },
+                    { name: "Internet Subscription", icon: "🌐" },
+                    { name: "House Rent", icon: "🏠" },
+                    { name: "Generator Fuel", icon: "⛽" },
+                    { name: "Bills (Electricity and Water etc)", icon: "⚡" }
+                ]
+            },
+            transport: {
+                name: "Transport",
+                icon: "🚌",
+                items: [
+                    { name: "Okada", icon: "🏍️" },
+                    { name: "Uber/Bolt", icon: "🚗" },
+                    { name: "Keke Napep", icon: "🛺" },
+                    { name: "Generator Fuel", icon: "⛽" },
+                    { name: "Car Fuel", icon: "🚗" },
+                    { name: "Bus Fare", icon: "🚌" },
+                    { name: "Taxi", icon: "🚖" }
+                ]
+            },
+            lifestyle: {
+                name: "Lifestyle",
+                icon: "😊",
+                items: [
+                    { name: "Cinema", icon: "🎬" },
+                    { name: "Suya Night", icon: "🥩" },
+                    { name: "Concert", icon: "🎶" },
+                    { name: "Shopping", icon: "🛍️" },
+                    { name: "Vacation", icon: "✈️" },
+                    { name: "Weddings/Parties", icon: "🎉" },
+                    { name: "Social Club Membership", icon: "🤝" },
+                    { name: "Hobbies (e.g., painting)", icon: "🎨" },
+                    { name: "Spa Day", icon: "💆‍♀️" }
+                ]
+            },
+            savings: {
+                name: "Savings",
+                icon: "💰",
+                items: [
+                    { name: "Bank Deposit", icon: "🏦" },
+                    { name: "Emergency Fund", icon: "🔒" },
+                    { name: "Investment", icon: "📈" },
+                    { name: "Debt Repayment", icon: "💳" },
+                    { name: "Education Fund", icon: "🎓" },
+                    { name: "Cooperative Contribution", icon: "🤝" },
+                    { name: "Ajo/Esusu Savings", icon: "💸" },
+                    { name: "Real Estate Savings", icon: "🏘️" },
+                    { name: "Insurance Premiums", icon: "🛡️" },
+                    { name: "Family Support Contributions", icon: "👨‍👩‍👧‍👦" }
+                ]
+            }
+        };
+
+        let selections = {
+            essentials: [],
+            transport: [],
+            lifestyle: [],
+            savings: []
+        };
+
+        function createCategorySection(categoryKey, category) {
+            const section = document.createElement('div');
+            section.className = 'category-section';
+            
+            const title = document.createElement('div');
+            title.className = 'category-title';
+            title.textContent = `${category.icon} ${category.name}`;
+            
+            const itemGrid = document.createElement('div');
+            itemGrid.className = 'item-grid';
+            
+            category.items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-checkbox';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `${categoryKey}-${item.name}`;
+                checkbox.addEventListener('change', (event) => handleSelection(categoryKey, item.name, event));
+                
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = `${item.icon} ${item.name}`;
+                
+                itemDiv.appendChild(checkbox);
+                itemDiv.appendChild(label);
+                itemGrid.appendChild(itemDiv);
+            });
+            
+            const error = document.createElement('div');
+            error.className = 'error-message';
+            error.id = `${categoryKey}-error`;
+            error.textContent = 'Please select exactly 4 items';
+            
+            section.appendChild(title);
+            section.appendChild(itemGrid);
+            section.appendChild(error);
+            
+            return section;
+        }
+
+        function handleSelection(category, itemName, event) {
+            if (!selections[category].includes(itemName)) {
+                if (selections[category].length < 4) {
+                    selections[category].push(itemName);
+                } else {
+                    event.target.checked = false;
+                    document.getElementById(`${category}-error`).style.display = 'block';
+                    return;
+                }
+            } else {
+                selections[category] = selections[category].filter(item => item !== itemName);
+            }
+            
+            document.getElementById(`${category}-error`).style.display = 'none';
+            updateContinueButton();
+        }
+
+        function updateContinueButton() {
+            const isValid = Object.values(selections).every(items => items.length === 4);
+            const continueButton = document.getElementById('continueButton');
+            continueButton.disabled = !isValid;
+        }
+
+        function initializeSelectionPage() {
+            const container = document.getElementById('categories-container');
+            Object.entries(SPENDING_CATEGORIES).forEach(([key, category]) => {
+                container.appendChild(createCategorySection(key, category));
+            });
+
+            document.getElementById('categoryForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                localStorage.setItem('categorySelections', JSON.stringify(selections));
+                window.location.href = 'start.html';
+            });
+        }
+
+        initializeSelectionPage();
+    </script>
+</body>
+</html>

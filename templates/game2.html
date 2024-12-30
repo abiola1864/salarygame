@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.27.2/dist/axios.min.js"></script>
+    <title>Life Choices Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="game-container">
+        <div class="stage-indicator">
+            <div class="stage-dot" data-stage="baseline"></div>
+            <div class="stage-dot" data-stage="description_page_condition_a"></div>
+            <div class="stage-dot" data-stage="condition_a"></div>
+            <div class="stage-dot" data-stage="condition_a_additionalpayment"></div>
+            <div class="stage-dot" data-stage="description_page_condition_b"></div>
+            <div class="stage-dot" data-stage="condition_b"></div>
+            <div class="stage-dot" data-stage="condition_b_bonus"></div>
+            <div class="stage-dot" data-stage="condition_c"></div>
+            <div class="stage-dot" data-stage="congratulations"></div>
+        </div>
+        <div id="scenario" class="scenario">
+            <h2 id="scenario-title"></h2>
+            <p id="scenario-description"></p>
+            <div id="unexpected-expense" class="unexpected-expense" style="display: none;"></div>
+        </div>
+
+     
+
+        <div id="shock-guidance" class="guidance-message-container"></div>
+     <div id="shockEvent" class="shock-container">
+            <div class="shock-content">
+                <h2>Life Happens! 😮</h2>
+                <p>Click one box to reveal your financial challenge...</p>
+                
+                <div class="shock-boxes">
+                    <div class="shock-box" onclick="revealShock(this, 0)">
+                        <span>?</span>
+                    </div>
+                    <div class="shock-box" onclick="revealShock(this, 1)">
+                        <span>?</span>
+                    </div>
+                    <div class="shock-box" onclick="revealShock(this, 2)">
+                        <span>?</span>
+                    </div>
+                </div>
+                
+                <button id="continueButton" style="display: none;" onclick="continueGame()">
+                    Continue Game
+                </button>
+            </div>
+        </div>
+
+
+        <button onclick="showStageData('baseline')">Show Data for Baseline</button>
+<button onclick="showAllStagesData()">Show Data for All Stages</button>
+<button onclick="clearAllGameData()">Clear All Game Data</button>
+
+<script>
+    function clearAllGameData() {
+        clearGameData();
+        clearLocalStorage();
+        alert("All game data has been cleared!");
+    }
+</script>
+
+
+
+
+
+
+        <!-- Split View for Condition B -->
+        <div id="split-view" class="split-view" style="display: none;">
+            <!-- Regular Salary Section -->
+            <div class="split-section">
+                <div class="split-header">Regular Salary (10,000 NGN)</div>
+                <div class="mini-progress-stats">
+                    <div>Spent: <span id="salary-spent">0 NGN</span></div>
+                    <div class="mini-progress">
+                        <div id="salary-progress" class="mini-progress-fill"></div>
+                    </div>
+                    <div>Remaining: <span id="salary-remaining">10,000 NGN</span></div>
+                </div>
+                <div id="salary-allocations"></div>
+            </div>
+
+    
+
+
+
+
+            <!-- Bonus Section -->
+            <div class="split-section">
+                <div class="split-header">Meal Bonus (5,000 NGN)</div>
+                <div class="mini-progress-stats">
+                    <div>Spent: <span id="bonus-spent">0 NGN</span></div>
+                    <div class="mini-progress">
+                        <div id="bonus-progress" class="mini-progress-fill"></div>
+                    </div>
+                    <div>Remaining: <span id="bonus-remaining">5,000 NGN</span></div>
+                </div>
+                <div id="bonus-allocations"></div>
+            </div>
+        </div>
+
+        <!-- Regular View -->
+        <div id="regular-view">
+            <div class="progress-container">
+                <div class="progress-stats">
+                    <div class="stat-box">
+                        <div>Available</div>
+                        <strong id="available-amount">0 NGN</strong>
+                    </div>
+                    <div class="stat-box">
+                        <div>Spent</div>
+                        <strong id="spent-amount">0 NGN</strong>
+                    </div>
+                    <div class="stat-box">
+                        <div>Remaining</div>
+                        <strong id="remaining-amount">0 NGN</strong>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <form id="allocation-form">
+                <div class="allocation-grid">
+                    <div class="category-section">
+                        <div class="category-title">
+                            <i class="fas fa-utensils"></i> Daily Needs
+                        </div>
+                        <div id="essentials-grid" class="item-grid"></div>
+                    </div>
+                    
+                    <div class="category-section">
+                        <div class="category-title">
+                            <i class="fas fa-bus"></i> Transport
+                        </div>
+                        <div id="transport-grid" class="item-grid"></div>
+                    </div>
+                    
+                    <div class="category-section">
+                        <div class="category-title">
+                            <i class="fas fa-smile"></i> Lifestyle
+                        </div>
+                        <div id="lifestyle-grid" class="item-grid"></div>
+                    </div>
+                    
+                    <div class="category-section">
+                        <div class="category-title">
+                            <i class="fas fa-piggy-bank"></i> Savings
+                        </div>
+                        <div id="savings-grid" class="item-grid"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="controls-section">
+            <button type="submit" id="submit-button">Submit Choices</button>
+        </div>
+
+        <div id="game-complete" class="game-complete">
+            <h2>Congratulations!</h2>
+            <p>You have completed all stages of the Life Choices Game.</p>
+            <button onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // const SPENDING_CATEGORIES = {
+        //     essentials: {
+        //         name: "Daily Needs",
+        //         icon: "fas fa-utensils",
+        //         items: [
+        //             { name: "Food Stuffs", icon: "🍲" },
+        //             { name: "Groceries", icon: "🍲" },
+        //             { name: "School Fees", icon: "🎓" },
+        //             { name: "House Rent", icon: "🏠" },
+        //             { name: "Electricity Bill (AECN)", icon: "⚡" },
+        //             { name: "Water Bill", icon: "💧" },
+        //             { name: "Medical Bills", icon: "💊" },
+        //             { name: "Transportation to Work", icon: "🚌" },
+        //             { name: "Mobile Data/Internet", icon: "📶" },
+        //             { name: "Cleaning Supplies", icon: "🧼" },
+        //             { name: "Childcare Supplies", icon: "📚" },
+        //             { name: "Clothing and Footwear", icon: "👗" },
+        //             { name: "Cooking Gas", icon: "⛽" },
+        //             { name: "Laundry Services", icon: "🧺" },
+        //             { name: "Security Fees", icon: "🔒" },
+        //             { name: "House Maintenance", icon: "🔧" },
+        //             { name: "Spiritual/Tithe Donations", icon: "⛪" }
+        //         ]
+        //     },
+        //     transport: {
+        //         name: "Transport",
+        //         icon: "fas fa-bus",
+        //         items: [
+        //             { name: "Okada", icon: "🏍️" },
+        //             { name: "Uber/Bolt", icon: "🚗" },
+        //             { name: "Generator Fuel", icon: "⛽" },
+        //             { name: "Car Fuel", icon: "🚗" },
+        //             { name: "Bus Fare", icon: "🚌" },
+        //             { name: "Taxi", icon: "🚖" }
+        //         ]
+        //     },
+        //     lifestyle: {
+        //         name: "Lifestyle",
+        //         icon: "fas fa-smile",
+        //         items: [
+        //             { name: "Cinema Visit", icon: "🎬" },
+        //             { name: "Suya Night", icon: "🥩" },
+        //             { name: "Concert Tickets", icon: "🎶" },
+        //             { name: "Shopping Spree", icon: "🛍️" },
+        //             { name: "Vacations", icon: "✈️" },
+        //             { name: "Spa Day", icon: "💆‍♀️" },
+        //             // { name: "Gourmet Dinner", icon: "🍽️" },
+        //             { name: "Gaming Subscription", icon: "🎮" },
+        //             { name: "Designer Clothes", icon: "👗" },
+        //             { name: "Sports Event Tickets", icon: "🏟️" },
+        //             { name: "Streaming Subscription", icon: "📺" },
+        //             { name: "Art Gallery Visit", icon: "🖼️" }
+        //         ]
+        //     },
+        //     savings: {
+        //         name: "Savings",
+        //         icon: "fas fa-piggy-bank",
+        //         items: [
+        //             { name: "Bank Deposit", icon: "🏦" },
+        //             { name: "Emergency Fund", icon: "🔒" },
+        //             { name: "Investment", icon: "📈" },
+        //             { name: "Debt Repayment", icon: "💳" },
+        //             { name: "Cooperative Saving", icon: "🤝" },
+        //             { name: "Forex Savings", icon: "💵" },
+        //             { name: "Education Fund", icon: "🎓" }
+        //         ]
+        //     }
+        // };
+
+
+
+        const SPENDING_CATEGORIES = {
+            essentials: {
+                name: "Daily Needs",
+                icon: "🛍️",
+                items: [
+                    { name: "Food Stuffs", icon: "🍲" },
+                    { name: "Groceries", icon: "🍲" },
+                    { name: "Clothing", icon: "👕" },
+                    { name: "Childcare Expenses", icon: "🍼" },
+                    { name: "School Fees", icon: "🎓" },
+                    { name: "Internet Subscription", icon: "🌐" },
+                    { name: "House Rent", icon: "🏠" },
+                    { name: "Generator Fuel", icon: "⛽" },
+                    { name: "Bills (Electricity and Water etc)", icon: "⚡" }
+                ]
+            },
+            transport: {
+                name: "Transport",
+                icon: "🚌",
+                items: [
+                    { name: "Okada", icon: "🏍️" },
+                    { name: "Uber/Bolt", icon: "🚗" },
+                    { name: "Keke Napep", icon: "🛺" },
+                    { name: "Generator Fuel", icon: "⛽" },
+                    { name: "Car Fuel", icon: "🚗" },
+                    { name: "Bus Fare", icon: "🚌" },
+                    { name: "Taxi", icon: "🚖" }
+                ]
+            },
+            lifestyle: {
+                name: "Lifestyle",
+                icon: "😊",
+                items: [
+                    { name: "Cinema", icon: "🎬" },
+                    { name: "Suya Night", icon: "🥩" },
+                    { name: "Concert", icon: "🎶" },
+                    { name: "Shopping", icon: "🛍️" },
+                    { name: "Vacation", icon: "✈️" },
+                    { name: "Weddings/Parties", icon: "🎉" },
+                    { name: "Social Club Membership", icon: "🤝" },
+                    { name: "Hobbies (e.g., painting)", icon: "🎨" },
+                    { name: "Spa Day", icon: "💆‍♀️" }
+                ]
+            },
+            savings: {
+                name: "Savings",
+                icon: "💰",
+                items: [
+            { name: "Bank Deposit", icon: "🏦" },
+            { name: "Emergency Fund", icon: "🔒" },
+            { name: "Investment", icon: "📈" },
+            { name: "Debt Repayment", icon: "💳" },
+            { name: "Education Fund", icon: "🎓" },
+            { name: "Cooperative Contribution", icon: "🤝" },
+            { name: "Ajo/Esusu Savings", icon: "💸" },
+            { name: "Real Estate Savings", icon: "🏘️" },
+            { name: "Insurance Premiums", icon: "🛡️" },
+            { name: "Family Support Contributions", icon: "👨‍👩‍👧‍👦" }
+        ]
+            }
+        };
+
+
+
+
+        // Modified STAGES object to include proper condition_b1 handling and post-shock descriptions
+
+
+
+
+
+
+// Function to update scenario description after shock event
+function updateScenarioAfterShock() {
+    const stage = STAGES[currentStage];
+    const currentStageData = stageData[currentStage];
+    
+    if (currentStageData && currentStageData.shockApplied) {
+        const shockEvent = selectedEvents.find(event => event.amount === shockAmount);
+        if (shockEvent) {
+            // Update the scenario description with the post-shock description
+            document.getElementById('scenario-description').innerHTML = 
+                stage.getPostShockDescription(shockEvent, shockAmount);
+        }
+    }
+}
+
+
+
+const STAGES = {
+    'baseline': {
+        title: '📊 January 2025',
+        description: `Welcome to January, my guy! 🌟
+
+You've just received your 6,000 NGN salary. Ahhh, the good old' 6K! 😅 You know the drill — it's your regular monthly hustle, and now it's time to make it stretch! 😂😂
+
+From food to transport, everything must fit within this amount. Sometimes you'll need to stretch it like chewing gum! 😜 Maybe you'll skip that extra portion of suya, or take the okada instead of the bus. Oh, and don't forget the random "emergency" expenses that pop up out of nowhere — *"Abeg, can you send me airtime? My phone don spoil!"* 🥲
+
+But, for now, you've got **6,000 NGN** to work with. We know you have many needs, but we've capped it to **two per category** for now. No worries, we're all in this together. 💪 You'll have the chance to plan for other things next month, but for now, let's see what you can do with this 6K.
+
+The month is in your hands! 💸`,
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Chai! 😩 Life just threw you a curveball! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your budget!
+
+Now your 6,000 NGN is looking more like ${(6000 - shockAmount).toLocaleString()} NGN. Time to put on your financial ninja skills! 🥷
+
+You'll need to adjust your budget to handle this surprise expense. Remember, every naira counts! Let's see how you navigate this challenge. 💪`,
+        base_salary: 6000,
+        shock_range: [1000, 2000],
+        framing: 'regular'
+    },
+    'description_page_condition_a': {
+        title: '💰 March 2025 Preview',
+        description: `Bam! It's March, and we're marching into MONEY! 🎉
+
+This month, you're not just getting the usual **6,000 NGN** salary. Oh no, you're getting an **extra 4,000 NGN**! That's a total of **10,000 NGN** to juggle for the month. 🤑
+
+But before you start planning to buy everything on Jumia, let's talk. That **extra 4,000 NGN** is an **ADDITIONAL PAYMENT** to cushion the economic times! Just a little something from the powers that be to help you survive this month. 💪
+
+Now, don't get too excited o, it's **temporary**! We no sabi how long this extra cash will last. 🙌 So enjoy it while it's here, but stay grounded. Save some for emergencies — after all, your aunty can still send that "Emergency Alert" message anytime. 😂`,
+        isDescriptionPage: true
+    },
+    'condition_a': {
+        title: '💸 March 2025 - Regular Salary',
+        description: 'Time to manage your regular salary of 6,000 NGN!',
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Eiya! 😧 Life happened! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your regular salary!
+
+Your 6,000 NGN salary is now ${(6000 - shockAmount).toLocaleString()} NGN. Time to adjust your plans! 💪
+
+Show us how you handle this surprise expense. Every naira counts!`,
+        base_salary: 6000,
+        shock_range: [1000, 2000],
+        framing: 'regular'
+    },
+    'condition_a_additionalpayment': {
+        title: '💸 March 2025 - Additional Payment',
+        description: 'Now, let\'s manage your additional payment of 4,000 NGN!',
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Chai! 😩 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your additional payment!
+
+Your 4,000 NGN additional payment is now ${(4000 - shockAmount).toLocaleString()} NGN. Let's see how you handle this! 💪
+
+Time to show those money management skills!`,
+        base_salary: 4000,
+        shock_range: [1000, 2000],
+        framing: 'regular'
+    },
+    'description_page_condition_b': {
+        title: '🎉 Bonus Time Preview!',
+        description: `Bam, bam! Big win! 🎉
+
+This month, you've got a special **meal bonus of 5,000 NGN**. So, in addition to your **10,000 NGN salary**, that's a total of **15,000 NGN** for this month! 💰
+
+It's a **meal bonus** just for you — a reward for all your hustle. Whether you decide to splurge on that special meal, clear bills, or stash it away for the rainy day, the choice is yours.
+
+Enjoy the bonus 🤑`,
+        isDescriptionPage: true,
+        hasAnimation: true
+    },
+    'condition_b': {
+        title: '💰 July 2025 - Regular Salary',
+        description: 'Time to manage your regular salary of 10,000 NGN!',
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Ah ah! 😫 Life comes at you fast! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your salary!
+
+Your 10,000 NGN salary is now ${(10000 - shockAmount).toLocaleString()} NGN. Time to readjust! 💪
+
+Show us how you handle unexpected expenses with your upgraded salary!`,
+        base_salary: 10000,
+        shock_range: [2000, 3000],
+        framing: 'regular'
+    },
+    'condition_b_bonus': {
+        title: '🏅 July 2025 - Meal Bonus',
+        description: 'Now, let\'s manage your special meal bonus of 5,000 NGN!',
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Ewo! 😱 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your meal bonus!
+
+Your 5,000 NGN bonus is now ${(5000 - shockAmount).toLocaleString()} NGN. Time to revise those plans!
+
+Let's see how you handle this surprise with your bonus money! 💪`,
+        base_salary: 5000,
+        shock_range: [1000, 2000],
+        framing: 'regular'
+    },
+    'condition_b1': {
+        title: '💰 Lump Sum Salary and Bonus',
+        description: `This month, your salary and bonus are combined into a lump sum of **15,000 NGN**! 🎉
+
+You're no longer juggling separate payments — this is the full package: salary and bonus rolled into one. 💰
+
+Enjoy the extra cushion, but be mindful of your spending! With this lump sum, you can still face surprises, so stay ready to adjust if life throws any unexpected expenses your way. 
+
+But for now, it's time to manage your **15,000 NGN** as one total. Keep your financial skills sharp! 💪`,
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Whoa! 😮 A surprise expense just hit! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your lump sum!
+
+Now your **15,000 NGN** is down to ${(15000 - shockAmount).toLocaleString()} NGN. Time to recalculate and adjust!
+
+Can you still manage with less? Show us how you handle unexpected expenses with this combined amount! 💸`,
+        base_salary: 15000,
+        shock_range: [2000, 4000],
+        framing: 'lumpsum'
+    },
+    'condition_c': {
+        title: '💰 Salary Increase Stage',
+        description: `Hold on tight! 🎉
+
+This month, your salary just got a serious upgrade! From **15,000 NGN** to **25,000 NGN**! That's right, **10,000 NGN extra** just for you!
+
+No more counting pennies or stretching the budget — you're officially living the good life! 💃
+
+Time to show off that new salary, spoil yourself a little, and celebrate your **hard work** paying off. 😎
+
+Enjoy the boost, because you absolutely deserve it! 💸`,
+        getPostShockDescription: (shockEvent, shockAmount) => `
+Even big salaries get reality checks! 😅 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} you didn't plan for!
+
+Your fancy 25,000 NGN salary is now ${(25000 - shockAmount).toLocaleString()} NGN. Still impressive, but requires some tweaking!
+
+Show us how the wealthy handle unexpected expenses! 🎩 Time to flex those premium budgeting skills!`,
+        base_salary: 25000,
+        shock_range: [2000, 3000],
+        framing: 'salary-increase'
+    },
+    'congratulations': {
+        title: '🎉 Congratulations!',
+        description: `
+You've successfully completed all the stages of the Life Choices Game! 🏆
+Well done!`,
+        base_salary: 0,
+        isDescriptionPage: true,
+    hasAnimation: true,
+        framing: 'congratulations'
+    }
+};
+
+
+
+
+// Function to update scenario description after shock event
+function updateScenarioAfterShock() {
+    const stage = STAGES[currentStage];
+    const currentStageData = stageData[currentStage];
+    
+    if (currentStageData && currentStageData.shockApplied) {
+        const shockEvent = selectedEvents.find(event => event.amount === shockAmount);
+        if (shockEvent) {
+            // Update the scenario description with the post-shock description
+            document.getElementById('scenario-description').innerHTML = 
+                stage.getPostShockDescription(shockEvent, shockAmount);
+        }
+    }
+}
+
+
+
+
+
+
+let currentStage = 'baseline';
+let totalAmount = 0;
+let totalEarnings = 0;
+let timerInterval;
+let timeRemaining = 180; // 3 minutes in seconds
+
+let selectedEvents = [];
+let shockAmount = 0;
+let stageData = {};
+
+function startTimer() {
+    timeRemaining = 180;
+    clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('timer').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            alert("Time's up! No speed bonus for this round.");
+        }
+    }, 1000);
+}
+
+function getRandomItems(category) {
+    const selections = getStoredSelections();
+    const selectedItems = selections[category] || [];
+    
+    // Map selected item names back to their full item objects
+    return selectedItems
+        .map(itemName => {
+            return SPENDING_CATEGORIES[category].items.find(item => item.name === itemName);
+        })
+        .filter(item => item !== undefined) // Filter out any undefined items
+        .slice(0, 2); // Ensure we only get 2 items even if more were selected
+}
+
+
+
+
+function createItemRow(item, categoryKey, prefix = '') {
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.innerHTML = `
+        <div class="item-name">
+            <span>${item.icon}</span>
+            ${item.name}
+        </div>
+        <input type="number" 
+               name="${prefix}${categoryKey}_${item.name.toLowerCase().replace(/\s+/g, '_')}"
+               min="0" 
+               oninput="updateAmount()"
+               required>
+    `;
+    return div;
+}
+
+
+
+
+
+
+// function populateCategorySection(parentElement, categoryKey, prefix = '') {
+//     const section = document.createElement('div');
+//     section.className = 'category-section';
+//     section.innerHTML = `
+//         <div class="category-title">
+//             <i class="${SPENDING_CATEGORIES[categoryKey].icon}"></i>
+//             ${SPENDING_CATEGORIES[categoryKey].name}
+//         </div>
+//         <div class="item-grid">
+//             ${getRandomItems(categoryKey, 2)
+//                 .map(item => createItemRow(item, categoryKey, prefix).outerHTML)
+//                 .join('')}
+//         </div>
+//     `;
+//     parentElement.appendChild(section);
+// }
+
+
+function getStoredSelections() {
+    const selections = localStorage.getItem('categorySelections');
+    return selections ? JSON.parse(selections) : {};
+}
+
+// function getSelectedItems(category) {
+//     const selections = getStoredSelections();
+//     const selectedItems = selections[category] || [];
+//     return selectedItems.map(itemName => {
+//         return SPENDING_CATEGORIES[category].items.find(item => item.name === itemName);
+//     }).filter(item => item);
+// }
+
+
+
+
+
+// function populateCategorySection(parentElement, categoryKey, prefix = '') {
+//     const section = document.createElement('div');
+//     section.className = 'category-section';
+//     section.innerHTML = `
+//         <div class="category-title">
+//             <i class="${SPENDING_CATEGORIES[categoryKey].icon}"></i>
+//             ${SPENDING_CATEGORIES[categoryKey].name}
+//         </div>
+//         <div class="item-grid">
+//             ${getSelectedItems(categoryKey)
+//                 .map(item => createItemRow(item, categoryKey, prefix).outerHTML)
+//                 .join('')}
+//         </div>
+//     `;
+//     parentElement.appendChild(section);
+// }
+
+function getSelectedItems(category) {
+    const selections = getStoredSelections();
+    const selectedItems = selections[category] || [];
+    
+    // Shuffle the selected items and pick the first two
+    const shuffled = selectedItems.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 2).map(itemName => {
+        return SPENDING_CATEGORIES[category].items.find(item => item.name === itemName);
+    }).filter(item => item);
+}
+
+
+
+function populateCategorySection(parentElement, categoryKey, prefix = '') {
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    section.innerHTML = `
+        <div class="category-title">
+            <i class="${SPENDING_CATEGORIES[categoryKey].icon}"></i>
+            ${SPENDING_CATEGORIES[categoryKey].name}
+        </div>
+        <div class="item-grid">
+            ${getSelectedItems(categoryKey)
+                .map(item => createItemRow(item, categoryKey, prefix).outerHTML)
+                .join('')}
+        </div>
+    `;
+    parentElement.appendChild(section);
+}
+
+
+
+
+// Get all the stage dots
+const dots = document.querySelectorAll('.stage-dot');
+
+// Update each dot's state
+dots.forEach(dot => {
+    const stageName = dot.dataset.stage; // Access the data-stage value
+    if (stageName === currentStage) {
+        dot.classList.add('active');
+    }
+});
+
+
+
+
+function getTotalAmount(stageName) {
+    const stage = STAGES[stageName];
+    if (!stage) return 0;
+
+    let total = stage.base_salary || 0;
+    if (stage.additional_payment) total += stage.additional_payment;
+
+    if (stageData[stageName]?.shockAmount) {
+        total -= stageData[stageName].shockAmount;
+    }
+
+    return total;
+}
+
+
+
+
+function updateAmount() {
+    const stage = STAGES[currentStage];
+    if (!stage) return;
+
+    const inputs = document.querySelectorAll('input[type="number"]');
+    let spent = 0;
+    inputs.forEach(input => {
+        spent += parseInt(input.value) || 0;
+    });
+
+    const totalAmount = getTotalAmount(currentStage);
+    const remaining = totalAmount - spent;
+
+    // Update the displayed amounts
+    document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+    document.getElementById('spent-amount').textContent = `${spent.toLocaleString()} NGN`;
+    document.getElementById('remaining-amount').textContent = `${remaining.toLocaleString()} NGN`;
+
+    // Update progress bar
+    const progressPercentage = (spent / totalAmount) * 100;
+    document.getElementById('progress').style.width = `${Math.min(progressPercentage, 100)}%`;
+
+    // Add error highlighting if overspending occurs
+    const remainingElement = document.getElementById('remaining-amount');
+    remainingElement.style.color = remaining < 0 ? 'red' : '';
+}
+
+
+
+
+
+function updateStageIndicators() {
+    const stageSequence = Object.keys(STAGES); // Dynamically get all stage keys
+    document.querySelectorAll('.stage-dot').forEach((dot, index) => {
+        const stageName = stageSequence[index];
+        dot.dataset.stage = stageName;
+        dot.classList.toggle('active', stageName === currentStage);
+        dot.classList.toggle(
+            'completed',
+            stageSequence.indexOf(stageName) < stageSequence.indexOf(currentStage)
+        );
+    });
+}
+
+
+
+
+
+// Modified updateSplitAmount to handle shock amounts
+function updateSplitAmount() {
+    let salaryValid = true;
+    let bonusValid = true;
+    
+    const stage = STAGES[currentStage];
+    const isConditionA = currentStage === 'condition_a';
+    
+    // Set correct amounts based on stage
+    const salaryTarget = isConditionA ? 6000 : 10000;
+    const bonusTarget = isConditionA ? 4000 : 5000;
+    
+    // Get stored shock amount if any
+    const currentStageData = stageData[currentStage] || {};
+    const shockReduction = currentStageData.shockAmount || 0;
+    const shockPerSection = shockReduction / 2;
+    
+    ['salary', 'bonus'].forEach(section => {
+        const inputs = document.querySelectorAll(`input[name^="${section}_"]`);
+        let spent = 0;
+        inputs.forEach(input => {
+            spent += parseInt(input.value) || 0;
+        });
+        
+        const target = section === 'salary' ? salaryTarget : bonusTarget;
+        const adjustedTarget = target - shockPerSection;
+        
+        // Update displays with shock-adjusted amounts
+        const remaining = adjustedTarget - spent;
+        document.getElementById(`${section}-spent`).textContent = `${spent.toLocaleString()} NGN`;
+        document.getElementById(`${section}-remaining`).textContent = `${remaining.toLocaleString()} NGN`;
+        document.getElementById(`${section}-progress`).style.width = `${(spent / target) * 100}%`;
+        
+        // Validate based on condition and shock adjustment
+        if (isConditionA) {
+            if (spent !== adjustedTarget) {
+                inputs.forEach(input => input.classList.add('error'));
+                document.getElementById(`${section}-remaining`).style.color = 'red';
+                if (section === 'salary') salaryValid = false;
+                else bonusValid = false;
+            } else {
+                inputs.forEach(input => input.classList.remove('error'));
+                document.getElementById(`${section}-remaining`).style.color = '';
+            }
+        } else {
+            if (spent > adjustedTarget) {
+                inputs.forEach(input => input.classList.add('error'));
+                document.getElementById(`${section}-remaining`).style.color = 'red';
+                if (section === 'salary') salaryValid = false;
+                else bonusValid = false;
+            } else {
+                inputs.forEach(input => input.classList.remove('error'));
+                document.getElementById(`${section}-remaining`).style.color = '';
+            }
+        }
+    });
+    
+    document.getElementById('submit-button').disabled = !(salaryValid && bonusValid);
+}
+
+
+
+// Modified updateRegularAmount function to handle condition_b1 consistently with condition_b
+function updateRegularAmount() {
+    const inputs = document.querySelectorAll('input[type="number"]');
+    let spent = 0;
+    let isValid = true;
+    
+    // Get current stage data and shock information
+    const currentStageData = stageData[currentStage] || {};
+    const shockReduction = currentStageData.shockAmount || 0;
+    
+    // Calculate total amount available based on stage
+    let maxAmount;
+    if (currentStage === 'condition_b1') {
+        maxAmount = 10000 - shockReduction;  // Now matches condition_b's base salary logic
+    } else {
+        maxAmount = totalAmount;
+    }
+    
+    // Calculate spent amount
+    inputs.forEach(input => {
+        const value = parseInt(input.value) || 0;
+        spent += value;
+        
+        // Add validation
+        if (spent > maxAmount) {
+            input.classList.add('error');
+            isValid = false;
+        } else {
+            input.classList.remove('error');
+        }
+    });
+
+    
+
+    
+
+// Remove redundant event listener that had incorrect bonus amount
+// Correctly setup the submit button listener
+// function onSubmitButtonClick(e) {
+//     e.preventDefault();
+
+//     if (validateAllocations()) {
+//         const speedBonus = calculateSpeedBonus(timeRemaining);
+//         totalEarnings += speedBonus;
+
+//         if (speedBonus > 0) {
+//             alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
+//         }
+
+//         const stageEarnings = calculateStageEarnings(currentStage);
+//         totalEarnings += stageEarnings;
+
+//         document.getElementById('totalEarnings').textContent = 
+//             `₦${totalEarnings.toLocaleString()}`;
+        
+//         clearInterval(timerInterval);
+//         resetShockEvent();
+//         document.getElementById('shockEvent').style.display = 'flex';
+//     }
+// }
+
+// // Attach the corrected listener
+// document.getElementById('submit-button').removeEventListener('click', onSubmitButtonClick);
+// document.getElementById('submit-button').addEventListener('click', onSubmitButtonClick);
+
+
+
+
+
+    
+    // Update display colors based on validation
+    const remainingElement = document.getElementById('remaining-amount');
+    remainingElement.style.color = isValid ? '' : 'red';
+    remainingElement.textContent = `${(totalAmount - spent).toLocaleString()} NGN`;
+    
+    // Update other displays
+    document.getElementById('spent-amount').textContent = `${spent.toLocaleString()} NGN`;
+    
+    const percentage = (spent / totalAmount) * 100;
+    document.getElementById('progress').style.width = `${Math.min(percentage, 100)}%`;
+}
+
+
+
+// Modified setupSplitView function to handle both split view stages correctly
+function setupSplitView() {
+    const stage = STAGES[currentStage];
+    const salarySection = document.getElementById('salary-allocations');
+    const bonusSection = document.getElementById('bonus-allocations');
+    
+    // Clear existing content
+    salarySection.innerHTML = '';
+    bonusSection.innerHTML = '';
+    
+    // Set correct amounts in headers based on stage
+    const salaryHeader = document.querySelector('.split-section:first-child .split-header');
+    const bonusHeader = document.querySelector('.split-section:last-child .split-header');
+    
+    if (currentStage === 'condition_a') {
+        salaryHeader.textContent = 'Regular Salary (6,000 NGN)';
+        bonusHeader.textContent = 'Additional Payment (4,000 NGN)';
+    } else if (currentStage === 'condition_b') {
+        salaryHeader.textContent = 'Regular Salary (10,000 NGN)';
+        bonusHeader.textContent = 'Meal Bonus (5,000 NGN)';
+    }
+    
+    // Create and populate category sections
+    Object.keys(SPENDING_CATEGORIES).forEach(categoryKey => {
+        populateCategorySection(salarySection, categoryKey, 'salary_');
+        populateCategorySection(bonusSection, categoryKey, 'bonus_');
+    });
+    
+    // Initialize displays
+    updateSplitAmount();
+}
+
+
+
+function updateTotalAmount(change) {
+    totalAmount += change;
+    document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+    document.getElementById('remaining-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+    document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+}
+
+
+
+// // Modified updateInterface function to properly reset condition_b1
+// function updateInterface() {
+
+//     // Reset shock UI at the start of a new stage
+//     resetShockEvent();
+
+//     const stage = STAGES[currentStage];
+//     document.getElementById('scenario-title').textContent = stage.title;
+//     document.getElementById('scenario-description').innerHTML = stage.description;
+
+//     startTimer();
+
+//     // Clear any existing stage data when entering a new stage
+//     if (!stageData[currentStage]) {
+//         stageData[currentStage] = {
+//             shockApplied: false,
+//             shockAmount: 0
+//         };
+//     }
+
+//     // Reset total amount at the start of each stage
+//     if (currentStage === 'condition_b1') {
+//         // Always start condition_b1 with 10,000 NGN
+//         totalAmount = 10000;
+//         // Only apply shock if it happened in THIS stage
+//         if (stageData[currentStage].shockApplied) {
+//             totalAmount -= stageData[currentStage].shockAmount;
+//         }
+//     } else {
+//         totalAmount = stage.base_salary + (stage.additional_payment || 0);
+//         if (stageData[currentStage].shockApplied) {
+//             totalAmount -= stageData[currentStage].shockAmount;
+//         }
+//     }
+
+//     // Handle view type
+//     if (['condition_a1', 'condition_b1'].includes(currentStage)) {
+//         document.getElementById('split-view').style.display = 'grid';
+//         document.getElementById('regular-view').style.display = 'none';
+//         setupSplitView();
+//     } else {
+//         document.getElementById('split-view').style.display = 'none';
+//         document.getElementById('regular-view').style.display = 'block';
+        
+//         // Update displays with correct initial amount
+//         document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+//         document.getElementById('remaining-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+//         document.getElementById('spent-amount').textContent = '0 NGN';
+//         document.getElementById('progress').style.width = '0%';
+        
+//         // Clear and repopulate spending categories
+//         Object.keys(SPENDING_CATEGORIES).forEach(categoryKey => {
+//             const gridElement = document.getElementById(`${categoryKey}-grid`);
+//             gridElement.innerHTML = '';
+//             getRandomItems(categoryKey, 2).forEach(item => {
+//                 gridElement.appendChild(createItemRow(item, categoryKey));
+//             });
+//         });
+//     }
+
+//     // Reset all input values
+//     document.querySelectorAll('input[type="number"]').forEach(input => {
+//         input.value = '';
+//     });
+
+//     // Update validation states
+//     if (['condition_a1', 'condition_b1'].includes(currentStage)) {
+//         updateSplitAmount();
+//     } else {
+//         updateRegularAmount();
+//     }
+
+//     // Reset earnings display at game start
+//     if (currentStage === 'baseline') {
+//         totalEarnings = 0;
+//         document.getElementById('totalEarnings').textContent = '₦0';
+//     }
+
+//     updateStageIndicators();
+// }
+
+function updateInterface() {
+    resetShockEvent();
+
+    const stage = STAGES[currentStage];
+    const isDescriptionPage = stage.isDescriptionPage || false;
+
+    // Update basic UI elements
+    document.getElementById('scenario-title').textContent = stage.title;
+    document.getElementById('scenario-description').innerHTML = stage.description;
+
+    const allocationForm = document.getElementById('allocation-form');
+    const progressContainer = document.querySelector('.progress-container');
+    const scenarioElement = document.getElementById('scenario');
+    const controlsSection = document.querySelector('.controls-section');
+
+    if (!stageData[currentStage]) {
+        stageData[currentStage] = { shockApplied: false, shockAmount: 0 };
+    }
+
+    // Calculate the total amount including shocks
+    totalAmount = stage.base_salary + (stage.additional_payment || 0);
+    if (stageData[currentStage].shockApplied) {
+        totalAmount -= stageData[currentStage].shockAmount;
+    }
+
+    // Initialize UI for budget and inputs
+    if (!isDescriptionPage) {
+        allocationForm.style.display = 'block';
+        progressContainer.style.visibility = 'visible';
+        scenarioElement.style.margin = 'initial';
+
+        document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+        document.getElementById('remaining-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+        document.getElementById('spent-amount').textContent = '0 NGN';
+        document.getElementById('progress').style.width = '0%';
+
+        controlsSection.innerHTML = `
+            <button id="submit-button" onclick="handleSubmit()">Submit Choices</button>
+        `;
+    } else {
+        allocationForm.style.display = 'none';
+        progressContainer.style.visibility = 'hidden';
+        scenarioElement.style.margin = '2em auto';
+
+        controlsSection.innerHTML = `
+            <button id="next-button" onclick="proceedToNextStage()">Next</button>
+        `;
+    }
+
+    // Clear inputs and repopulate categories
+    document.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
+    if (['condition_a1', 'condition_b1'].includes(currentStage)) {
+        setupSplitView();
+        updateSplitAmount();
+    } else {
+        updateBudgetDisplay();
+        updateRegularAmount();
+    }
+
+    if (currentStage === 'baseline') {
+        totalEarnings = 0;
+        document.getElementById('totalEarnings').textContent = '₦0';
+    }
+
+    updateStageIndicators();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function addCelebratoryEffects() {
+    const scenario = document.getElementById('scenario');
+
+    if (!document.querySelector('.celebration')) {
+        scenario.innerHTML += `
+            <div class="celebration">
+                <div class="balloons">
+                    <div style="left: 20%; background-color: #ff9999;"></div>
+                    <div style="left: 50%; background-color: #99ccff;"></div>
+                    <div style="left: 80%; background-color: #ffcc99;"></div>
+                </div>
+                <div class="sparks"></div>
+            </div>
+        `;
+    }
+
+    scenario.classList.add('animate-celebration');
+}
+
+
+
+// Helper function to remove celebratory effects
+function removeCelebratoryEffects() {
+    const celebration = document.querySelector('.celebration');
+    if (celebration) celebration.remove();
+    document.getElementById('scenario').classList.remove('animate-celebration');
+}
+
+// Helper function to update the budget display dynamically
+function updateBudgetDisplay() {
+    document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+    document.getElementById('remaining-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+    document.getElementById('spent-amount').textContent = '0 NGN';
+    document.getElementById('progress').style.width = '0%';
+
+    // Clear and repopulate spending categories
+    Object.keys(SPENDING_CATEGORIES).forEach(categoryKey => {
+        const gridElement = document.getElementById(`${categoryKey}-grid`);
+        gridElement.innerHTML = '';
+        getRandomItems(categoryKey, 2).forEach(item => {
+            gridElement.appendChild(createItemRow(item, categoryKey));
+        });
+    });
+}
+
+
+
+
+let preShockCategorySum = 0; // Variable to track the initial category sum before shock
+
+
+
+
+
+
+function proceedToNextStage() {
+    const categorySum = calculateCategoryEarnings(); // Calculate category earnings
+    const speedBonus = timeRemaining > 0 ? 0 : 0; // Apply speed bonus if applicable
+
+    // Display earnings breakdown
+    showEarningsBreakdown(categorySum, speedBonus);
+
+    // Transition to the next stage
+    const stageSequence = Object.keys(STAGES);
+    const currentIndex = stageSequence.indexOf(currentStage);
+
+    if (currentIndex < stageSequence.length - 1) {
+        currentStage = stageSequence[currentIndex + 1];
+        showStageData(currentStage);
+        updateInterface();
+    } else {
+        // End of game logic
+        document.getElementById('game-complete').style.display = 'block';
+        alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
+    }
+}
+
+
+
+
+
+function showShockEvent() {
+    const category = stageCategory || selectRandomCategory();
+    console.log('Current category:', category);
+
+    const preShockCategorySum = calculateSelectedCategoryEarnings(category);
+
+    totalEarnings += preShockCategorySum;
+
+    // Save to the specific stage table
+    insertStageData(currentStage, {
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        user_id: 'user123', // Replace with dynamic user ID if available
+        total_amount: totalEarnings,
+        shock_amount: preShockCategorySum,
+        specific_option: category,
+        total_earning: totalEarnings,
+    });
+
+    document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+    document.getElementById('shockEvent').style.display = 'flex';
+}
+
+
+
+
+
+
+// Function to select a random category
+function selectRandomCategory() {
+    const categories = Object.keys(SPENDING_CATEGORIES);
+    return categories[Math.floor(Math.random() * categories.length)];
+}
+
+
+
+function calculateSelectedCategoryEarnings(category) {
+    // Select all inputs for the given category
+    const inputs = document.querySelectorAll(`input[name*="${category}"]`);
+
+    // Log inputs for debugging
+    if (inputs.length === 0) {
+        console.error(`No inputs found for category: ${category}`);
+        return 0;
+    }
+
+    let total = 0;
+
+    inputs.forEach(input => {
+        const value = parseInt(input.value) || 0; // Ensure value is a valid integer
+        if (isNaN(value)) {
+            console.warn(`Invalid input value for category: ${category}, input: ${input.name}`);
+        }
+        total += value;
+    });
+
+    // Log total for debugging
+    console.log(`Calculated earnings for category ${category}: ₦${total}`);
+    return total;
+}
+
+function showShockEvent() {
+    let speedBonus = 0;
+
+    // Apply speed bonus if applicable
+    if (timeRemaining > 0) {
+        speedBonus = 0;
+    }
+
+    // Adjust total earnings for the shock
+    const preShockCategorySum = calculateSelectedCategoryEarnings(stageCategory || selectRandomCategory());
+ 
+    const totalEarningsWithShock = preShockCategorySum  + speedBonus;
+
+    totalEarnings += totalEarningsWithShock;
+    document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+
+    // Display the shock event modal
+    document.getElementById('shockEvent').style.display = 'flex';
+}
+
+
+
+
+
+
+function updateTotalEarningsDisplay() {
+    if (!isNaN(totalEarnings) && totalEarnings >= 0) {
+        document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+    } else {
+        console.error("Total Earnings is invalid (NaN or negative)");
+        document.getElementById('totalEarnings').textContent = `₦0`;
+        totalEarnings = 0; // Reset to a safe value
+    }
+}
+
+
+
+
+
+let stageCategory; // Store the randomly selected category for the current stage
+
+function selectRandomCategory() {
+    const categories = Object.keys(SPENDING_CATEGORIES);
+    stageCategory = categories[Math.floor(Math.random() * categories.length)];
+    console.log(`Randomly selected category: ${stageCategory}`);
+}
+
+
+
+function calculateCategoryEarnings() {
+    const categories = Object.keys(SPENDING_CATEGORIES);
+    console.log('Available categories:', Object.keys(SPENDING_CATEGORIES));
+
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+
+    // Get all inputs from the selected category
+    const categoryInputs = document.querySelectorAll(`input[name*="${randomCategory}"]`);
+    if (!categoryInputs.length) {
+        console.warn(`No inputs found for category: ${randomCategory}`);
+        return 0; // Ensure a valid number is returned
+    }
+
+    // Sum the inputs
+    const sum = Array.from(categoryInputs).reduce((total, input) => {
+        const value = parseInt(input.value) || 0; // Ensure value defaults to 0
+        return total + value;
+    }, 0);
+
+    console.log(`Category: ${randomCategory}, Sum: ₦${sum}`); // Debugging log
+    return sum;
+}
+
+
+
+
+function proceedToNextStage() {
+    const categorySum = calculateCategoryEarnings();
+    const speedBonus = timeRemaining > 0 ? 500 : 0;
+
+    // Exclude shock amount in earnings breakdown
+    showEarningsBreakdown(categorySum, speedBonus);
+
+    const stageSequence = Object.keys(STAGES);
+    const currentIndex = stageSequence.indexOf(currentStage);
+
+    if (currentIndex < stageSequence.length - 1) {
+        currentStage = stageSequence[currentIndex + 1];
+        updateInterface();
+    } else {
+        alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
+    }
+}
+
+
+
+
+
+function continueGame() {
+    if (shockAmount > 0) {
+        const stage = STAGES[currentStage];
+        const totalBaseAmount = (stage.base_salary || 0) + (stage.additional_payment || 0);
+
+        // Adjust the working budget for the shock
+        totalAmount = totalBaseAmount - shockAmount;
+
+        // Notify the user about the new budget
+        alert(`
+An unexpected expense of ₦${shockAmount.toLocaleString()} has occurred!
+
+Your updated budget is now ₦${totalAmount.toLocaleString()}.
+        `);
+
+        // Update the UI to reflect the new budget
+        document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+        document.getElementById('remaining-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+        document.getElementById('spent-amount').textContent = '0 NGN';
+        document.getElementById('progress').style.width = '0%';
+
+        // Store the shock data
+        stageData[currentStage] = {
+            ...stageData[currentStage],
+            shockAmount: shockAmount,
+            shockApplied: true,
+        };
+
+        // Reload UI and proceed with adjustments
+        updateScenarioAfterShock();
+        updateRegularAmount();
+        document.getElementById('shockEvent').style.display = 'none';
+    }
+}
+
+
+function showEarningsBreakdown(preShockCategorySum, speedBonus) {
+    preShockCategorySum = Number(preShockCategorySum) || 0;
+    speedBonus = Number(speedBonus) || 0;
+
+    // Display earnings breakdown without updating totalEarnings again
+    alert(`
+    Earnings Breakdown:
+    - Current Earnings (from Sum of a Random Category): ₦${preShockCategorySum.toLocaleString()}
+    - Speed Bonus: ₦${speedBonus.toLocaleString()}
+    Total Earnings So Far: ₦${totalEarnings.toLocaleString()}
+    Keep pushing forward! You're doing great. 💰
+    `);
+}
+
+
+
+
+
+
+
+// function handleSubmit() {
+//     const categorySum = calculateCategoryEarnings(); // Calculate earnings for the category
+//     const speedBonus = 0// Add speed bonus if applicable
+
+//     if (!isNaN(categorySum) && categorySum >= 0) {
+//         totalEarnings += categorySum + speedBonus; // Exclude shockAmount
+//         console.log(`Category Earnings: ₦${categorySum}, Speed Bonus: ₦${speedBonus}`);
+//     } else {
+//         console.error("Invalid earnings calculation. Skipping update.");
+//     }
+
+//     // Update display and proceed
+//     updateTotalEarningsDisplay();
+//     proceedToNextStage();
+// }
+
+
+
+
+
+// function handleSubmit() {
+//     if (validateAllocations()) {
+//         const stage = STAGES[currentStage];
+//         const categorySum = calculateCategoryEarnings();
+//         const preShockBonus = stage.additional_payment || 0;
+//         let speedBonus = 0;
+
+//         // Calculate speed bonus once
+//         if (timeRemaining > 0) {
+//             speedBonus = 500;
+//         }
+
+//         // Add earnings to total without duplication
+//         const preShockEarnings = categorySum + preShockBonus + speedBonus;
+//         totalEarnings += preShockEarnings; 
+
+//         // Store the pre-shock category sum for later reference
+//         preShockCategorySum = categorySum;
+
+//         // Display speed bonus only once
+//         if (speedBonus > 0) {
+//             alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
+//         }
+
+//         // Clear timer and proceed to the shock event
+//         clearInterval(timerInterval);
+//         showShockEvent();
+//     }
+// }
+
+
+
+// function handleSubmit() {
+//    if (validateAllocations()) {
+//        const stage = STAGES[currentStage];
+//        const categorySum = calculateCategoryEarnings();
+//        const preShockBonus = stage.additional_payment || 0;
+//        let speedBonus = 0;
+
+
+//        // Calculate speed bonus once
+//        if (timeRemaining > 0) {
+//            speedBonus = 500; // Example bonus value; adjust as needed
+//        }
+
+
+//        // Add earnings to total without duplication
+//        const preShockEarnings = categorySum + preShockBonus + speedBonus;
+//        totalEarnings += preShockEarnings;
+
+
+//        // Store the pre-shock category sum for later reference
+//        preShockCategorySum = categorySum;
+
+
+//        // Display speed bonus message only once
+//        if (speedBonus > 0) {
+//            alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
+//        }
+
+
+
+
+
+//        // Clear timer and determine next steps
+//        clearInterval(timerInterval);
+
+
+//        if (!stageData[currentStage]?.shockApplied) {
+//            // Show shock event only if it has not occurred in this stage
+//            showShockEvent();
+//            stageData[currentStage] = {
+//                ...stageData[currentStage],
+//                shockApplied: true,
+//            };
+//        } else {
+//            // If shock event already occurred, proceed to the next stage
+//            proceedToNextStage();
+//        }
+//    }
+// }
+
+
+
+
+
+
+
+// function handleSubmit() {
+//     if (validateAllocations()) {
+//         const stage = STAGES[currentStage];
+//         const categorySum = calculateCategoryEarnings();
+//         const preShockBonus = stage.additional_payment || 0;
+//         const speedBonus = timeRemaining > 0 ? 500 : 0;
+
+//         const preShockEarnings = categorySum + preShockBonus + speedBonus;
+//         totalEarnings += preShockEarnings;
+//         preShockCategorySum = categorySum;
+
+//         if (speedBonus > 0) {
+//             alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
+//         }
+
+//         // Enhanced allocations structure
+//         const allocations = {};
+
+//         document.querySelectorAll('input[type="number"]').forEach(input => {
+//             const [categoryName, optionName] = input.name.split('_'); // Split into category and option
+//             if (!allocations[categoryName]) {
+//                 allocations[categoryName] = { total: 0, options: {} };
+//             }
+
+//             const value = parseInt(input.value) || 0;
+//             allocations[categoryName].total += value; // Add to category total
+//             allocations[categoryName].options[optionName] = value; // Store specific option value
+//         });
+
+//         const stageDataToSave = {
+//             date: new Date().toLocaleDateString(),
+//             time: new Date().toLocaleTimeString(),
+//             user_id: "player1",
+//             total_amount: totalAmount,
+//             shock_amount: shockAmount,
+//             total_earning: totalEarnings,
+//             specific_option: "exampleOption", // Replace with the actual selected option
+//             speed_bonus: speedBonus,
+//             pre_shock_earnings: preShockEarnings,
+//             amount_allocated_options: allocations // Enhanced data structure
+//         };
+
+//         insertStageData(currentStage, stageDataToSave);
+//         clearInterval(timerInterval);
+
+//         if (!stageData[currentStage]?.shockApplied) {
+//             showShockEvent();
+//             stageData[currentStage] = { ...stageData[currentStage], shockApplied: true };
+//         } else {
+//             saveGameData(); // Call the API to save the current game state
+//             proceedToNextStage();
+//         }
+//     }
+// }
+
+function handleSubmit() {
+    if (validateAllocations()) {
+        const stage = STAGES[currentStage];
+        const categorySum = calculateCategoryEarnings();
+        const preShockBonus = stage.additional_payment || 0;
+        const speedBonus = timeRemaining > 0 ? 500 : 0;
+
+        const preShockEarnings = categorySum + preShockBonus + speedBonus;
+        totalEarnings += preShockEarnings;
+        preShockCategorySum = categorySum;
+
+        if (speedBonus > 0) {
+            alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
+        }
+
+        // Build allocations object
+        const allocations = {};
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            const [categoryName, optionName] = input.name.split('_');
+            if (!allocations[categoryName]) {
+                allocations[categoryName] = { total: 0, options: {} };
+            }
+            const value = parseInt(input.value) || 0;
+            allocations[categoryName].total += value;
+            allocations[categoryName].options[optionName] = value;
+        });
+
+        const stageDataToSave = {
+            stageName: currentStage,
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString(),
+            user_id: "player1",
+            total_amount: totalAmount,
+            shock_amount: shockAmount,
+            total_earning: totalEarnings,
+            specific_option: "exampleOption",
+            speed_bonus: speedBonus,
+            pre_shock_earnings: preShockEarnings,
+            amount_allocated_options: allocations
+        };
+
+        clearInterval(timerInterval);
+
+        console.log('Attempting to save data:', stageDataToSave);
+        
+        saveGameData(stageDataToSave)
+            .then((response) => {
+                console.log('Save successful:', response);
+                if (!stageData[currentStage]?.shockApplied) {
+                    showShockEvent();
+                    stageData[currentStage] = { ...stageData[currentStage], shockApplied: true };
+                } else {
+                    proceedToNextStage();
+                }
+            })
+            .catch(error => {
+                console.error('Save error:', error);
+                alert('Error saving game data. Please try again.');
+            });
+    }
+}
+
+
+
+
+// Remove getAllocationsForStage function as it's no longer needed
+
+
+
+
+
+
+// New function to calculate earnings from a random category
+function calculateRandomCategoryEarnings() {
+    const categories = Object.keys(SPENDING_CATEGORIES);
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    
+    // Get all inputs from the selected category
+    const categoryInputs = document.querySelectorAll(
+        `input[name*="${randomCategory}"]`
+    );
+    
+    // Sum the inputs with a random factor
+    return Array.from(categoryInputs).reduce((sum, input) => {
+        const value = parseInt(input.value) || 0;
+        const randomFactor = Math.random() * 0.2 + 0.9; // Random factor between 0.9 and 1.1
+        return sum + (value * randomFactor);
+    }, 0);
+}
+
+
+
+
+
+
+// Helper function to calculate section total with random selection
+function calculateSectionTotal(section) {
+    return Array.from(document.querySelectorAll(`input[name^="${section}_"]`))
+        .reduce((sum, input) => {
+            const value = parseInt(input.value) || 0;
+            // Add some randomization to the earnings calculation
+            const randomFactor = Math.random() * 0.2 + 0.9; // Random factor between 0.9 and 1.1
+            return sum + (value * randomFactor);
+        }, 0);
+}
+
+// Helper function to calculate total spent with random selection
+function calculateTotalSpent() {
+    return Array.from(document.querySelectorAll('input[type="number"]'))
+        .reduce((sum, input) => {
+            const value = parseInt(input.value) || 0;
+            // Add some randomization to the earnings calculation
+            const randomFactor = Math.random() * 0.2 + 0.9; // Random factor between 0.9 and 1.1
+            return sum + (value * randomFactor);
+        }, 0);
+}
+
+
+
+
+
+
+const submitButton = document.getElementById('submit-button');
+const newSubmitButton = submitButton.cloneNode(true);
+submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+
+newSubmitButton.removeEventListener('click', handleSubmit); // Ensure no old listeners
+newSubmitButton.addEventListener('click', handleSubmit);
+
+
+function validateAllocations() {
+    const totalAmount = getTotalAmount(currentStage);
+    const inputs = document.querySelectorAll('input[type="number"]');
+    let totalSpent = 0;
+
+    inputs.forEach(input => {
+        totalSpent += parseInt(input.value) || 0;
+    });
+
+    if (inputs.length === 0) {
+        console.warn("No allocations available for validation.");
+        return true; // Skip validation for stages without inputs
+    }
+
+    if (totalSpent !== totalAmount) {
+        alert(`Please ensure your allocations match the total amount of ${totalAmount.toLocaleString()} NGN. You have allocated ${totalSpent.toLocaleString()} NGN.`);
+        return false;
+    }
+
+    return true;
+}
+
+
+
+
+
+
+
+
+// Helper functions for calculations
+function calculateSectionTotal(section) {
+    return Array.from(document.querySelectorAll(`input[name^="${section}_"]`))
+        .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+}
+
+function calculateTotalSpent() {
+    return Array.from(document.querySelectorAll('input[type="number"]'))
+        .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+}
+
+
+
+newSubmitButton.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    // Validate allocations
+    if (!validateAllocations()) {
+        return; // Stop further processing if validation fails
+    }
+
+    const currentStageData = stageData[currentStage];
+    const isPostShockAdjustment =
+        currentStageData && currentStageData.shockApplied && !currentStageData.adjustmentSubmitted;
+
+    if (isPostShockAdjustment) {
+        // Handle post-shock adjustments
+        stageData[currentStage].adjustmentSubmitted = true;
+        localStorage.setItem('stageData', JSON.stringify(stageData));
+        proceedToNextStage();
+    } else {
+        // Handle initial stage submission
+        const categoryEarnings = calculateCategoryEarnings();
+        totalEarnings += categoryEarnings;
+
+        if (timeRemaining > 0) {
+            const speedBonus = 500; // Ensure speed bonus logic is consistent
+            totalEarnings += speedBonus;
+            alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
+        }
+
+        // Update total earnings display
+        document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+        alert(`You earned ₦${categoryEarnings.toLocaleString()} this stage!`);
+
+        // Move to the next step or shock event
+        showShockEvent();
+    }
+
+    clearInterval(timerInterval); // Stop timer after submission
+});
+
+// Remove the old event listener completely
+// Do not add any other submit button event listeners
+
+
+
+// Initialize the game
+// window.onload = function() {
+//     // Add game header with earnings and timer
+//     const gameHeader = document.createElement('div');
+//     gameHeader.className = 'game-header';
+//     gameHeader.innerHTML = `
+//         <div class="earnings-display">
+//             Total Earnings: <span id="totalEarnings">₦0</span>
+//         </div>
+//         <div class="timer">
+//             Time Remaining: <span id="timer">3:00</span>
+//         </div>
+//     `;
+//     document.querySelector('.game-container').insertBefore(
+//         gameHeader,
+//         document.querySelector('.stage-indicator')
+//     );
+    
+//     updateInterface();
+// };
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for required data
+    const group = localStorage.getItem('selectedGroup');
+    const stageSequence = localStorage.getItem('stageSequence');
+    
+    if (!group || !stageSequence) {
+        alert('Required game data missing! Redirecting to the start page.');
+        window.location.href = 'start.html';
+        return;
+    }
+    
+    // Initialize the game if all required data is present
+    initializeGame();
+});
+
+
+
+
+// Update your existing initializeGame function
+function initializeGame(selections) {
+    totalEarnings = 0;
+
+    // Create game header
+    const gameHeader = document.createElement('div');
+    gameHeader.className = 'game-header';
+    gameHeader.innerHTML = `
+        <div class="earnings-display">
+            Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
+        </div>
+        <div class="timer">
+            Time Remaining: <span id="timer">3:00</span>
+        </div>
+    `;
+    
+    const gameContainer = document.querySelector('.game-container');
+    if (!gameContainer) {
+        console.error('Game container not found!');
+        return;
+    }
+    
+    gameContainer.insertBefore(
+        gameHeader,
+        document.querySelector('.stage-indicator')
+    );
+
+    try {
+        const stageSequence = JSON.parse(localStorage.getItem('stageSequence'));
+        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+            throw new Error('Invalid stage sequence');
+        }
+
+        currentStage = stageSequence[0];
+        stageData[currentStage] = { shockApplied: false, shockAmount: 0 };
+
+        // Apply selections if provided
+        if (selections) {
+            applySelections(selections);
+        }
+
+        updateInterface();
+    } catch (error) {
+        console.error('Error initializing game:', error);
+        alert('Error initializing game! Returning to start page.');
+        window.location.href = 'start.html';
+    }
+}
+
+
+
+
+
+
+// Add window.onload event listener at the end of game.html
+window.addEventListener('load', function() {
+    // Check if selections exist
+    const selections = localStorage.getItem('categorySelections');
+    if (!selections) {
+        // Redirect to selection page if no selections are found
+        window.location.href = 'selection.html';
+        return;
+    }
+    
+    // Initialize game if selections exist
+    const gameHeader = document.createElement('div');
+    gameHeader.className = 'game-header';
+   
+    document.querySelector('.game-container').insertBefore(
+        gameHeader,
+        document.querySelector('.stage-indicator')
+    );
+    
+    updateInterface();
+});
+
+
+
+
+const SHOCK_EVENTS = [
+    // { text: "Surprise! Your friend's birthday party is tomorrow. Time to buy a gift! 🎁", amount: 1500 },
+    // { text: "PHCN has disconnected your electricity without notice. Emergency reconnection needed! ⚡", amount: 2000 },
+    // { text: "Your phone screen cracked. Quick repair needed for work! 📱", amount: 1800 },
+    // { text: "Unexpected transportation fare increase this week! 🚌", amount: 1200 },
+    // { text: "Emergency medical consultation needed! 🏥", amount: 1700 },
+    // { text: "Surprise family visit - need to stock up on groceries! 🛒", amount: 1300 },
+    // { text: "Your favorite food vendor increased prices! 🍲", amount: 1100 },
+    // { text: "Water supply issues - need to buy from water truck! 💧", amount: 1600 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 }
+];
+
+
+function revealShock(box, index) {
+    if (!box.classList.contains('revealed')) {
+        const event = selectedEvents[index];
+        box.innerHTML = `
+            <div>
+                <p>${event.text}</p>
+                <div class="shock-amount">-₦${event.amount}</div>
+            </div>
+        `;
+        box.classList.add('revealed');
+        shockAmount = event.amount;
+
+        const continueButton = document.getElementById('continueButton');
+        continueButton.style.display = 'block';
+
+        if (shockAmount === 0) {
+            // For no shock, show "Proceed to Next Stage" button
+            alert("No unexpected expense this stage! You can now proceed to the next stage.");
+            continueButton.textContent = 'Proceed to Next Stage';
+            continueButton.onclick = proceedToNextStage; // Set the correct function for next stage
+        } else {
+            // For shocks, show "Return to Budget" button
+            continueButton.textContent = 'Return to Budget';
+            continueButton.onclick = continueGame; // Return to budget adjustments
+        }
+
+        // Disable other boxes to prevent multiple clicks
+        document.querySelectorAll('.shock-box').forEach(b => {
+            b.style.pointerEvents = 'none';
+        });
+    }
+}
+
+function updateAmountDisplays() {
+    document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+
+    // Include shock amount only in spent calculation, not earnings
+    const inputs = document.querySelectorAll('input[type="number"]');
+    let spent = shockAmount; // Only reflect shock as a reduction, not in earnings
+    inputs.forEach(input => {
+        spent += parseInt(input.value) || 0;
+    });
+
+    document.getElementById('spent-amount').textContent = `${spent.toLocaleString()} NGN`;
+    const remaining = totalAmount - spent;
+    document.getElementById('remaining-amount').textContent = `${remaining.toLocaleString()} NGN`;
+    document.getElementById('progress').style.width = `${Math.min((spent / totalAmount) * 100, 100)}%`;
+}
+
+
+
+
+function saveStageData() {
+   const inputs = document.querySelectorAll('input[type="number"]');
+   const allocations = {};
+  
+   inputs.forEach(input => {
+       allocations[input.name] = input.value;
+   });
+  
+   stageData[currentStage] = {
+       allocations,
+       totalAmount,
+       shockAmount
+   };
+  
+   localStorage.setItem('stageData', JSON.stringify(stageData));
+}
+
+
+
+
+
+
+function loadStageData() {
+   const savedData = localStorage.getItem('stageData');
+   if (savedData) {
+       stageData = JSON.parse(savedData);
+       const currentStageData = stageData[currentStage];
+
+
+       if (currentStageData) {
+           // Restore shock amount if it exists
+           shockAmount = currentStageData.shockAmount || 0;
+
+
+           // Restore previous inputs
+           if (currentStageData.previousInputs) {
+               Object.entries(currentStageData.previousInputs).forEach(([name, value]) => {
+                   const input = document.querySelector(`input[name="${name}"]`);
+                   if (input) input.value = value;
+               });
+           }
+
+
+           // Update total amount dynamically for all stages
+           const totalAmount = getTotalAmount(currentStage);
+           document.getElementById('available-amount').textContent = `${totalAmount.toLocaleString()} NGN`;
+
+
+           // Update displays dynamically
+           updateAmount();
+       }
+   }
+}
+
+
+
+
+
+clearInterval(timerInterval);
+timerInterval = setInterval(() => {
+    timeRemaining--;
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    document.getElementById('timer').textContent = 
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        alert("Time's up! No speed bonus for this round.");
+    }
+}, 1000);
+
+
+
+
+
+function resetShockEvent() {
+    // Reset the shock boxes
+    document.querySelectorAll('.shock-box').forEach(box => {
+        box.innerHTML = '<span>?</span>';
+        box.classList.remove('revealed');
+        box.style.pointerEvents = '';
+    });
+
+    // Hide the continue button
+    const continueButton = document.getElementById('continueButton');
+    if (continueButton) {
+        continueButton.style.display = 'none';
+    }
+
+    // Hide the shock event UI
+    const shockEvent = document.getElementById('shockEvent');
+    if (shockEvent) {
+        shockEvent.style.display = 'none';
+    }
+
+    // Reset shock amount and selected events
+    shockAmount = 0;
+    selectedEvents = SHOCK_EVENTS.sort(() => 0.5 - Math.random()).slice(0, 3);
+}
+
+
+
+
+
+
+
+
+
+let db; // Declare the database globally
+
+
+const request = indexedDB.open("gameDatabase", 1);
+
+
+request.onupgradeneeded = (event) => {
+   db = event.target.result;
+
+
+   // Create an object store for each stage
+   const stages = Object.keys(STAGES);
+   stages.forEach(stageName => {
+       if (!db.objectStoreNames.contains(stageName)) {
+           db.createObjectStore(stageName, { keyPath: "id", autoIncrement: true });
+       }
+   });
+};
+
+
+request.onsuccess = (event) => {
+   db = event.target.result;
+   console.log("IndexedDB initialized successfully.");
+};
+
+
+request.onerror = (event) => {
+   console.error("IndexedDB error:", event.target.errorCode);
+};
+
+
+
+// function insertStageData(stageName, data) {
+//    const transaction = db.transaction(stageName, "readwrite");
+//    const store = transaction.objectStore(stageName);
+//    store.add(data);
+
+
+//    transaction.oncomplete = () => {
+//        console.log(`Data added to ${stageName}:`, data);
+//    };
+
+
+//    transaction.onerror = (event) => {
+//        console.error(`Error inserting data into ${stageName}:`, event.target.errorCode);
+//    };
+// }
+
+
+
+function insertStageData(stageName, data) {
+  axios.post('/api/save-game-data', {
+    stageName,
+    ...data,
+  })
+  .then(response => {
+    console.log('Data saved successfully:', response.data);
+  })
+  .catch(error => {
+    console.error('Error saving data:', error);
+  });
+}
+
+
+
+
+
+function fetchStageData(stageName, callback) {
+   const transaction = db.transaction(stageName, "readonly");
+   const store = transaction.objectStore(stageName);
+   const request = store.getAll();
+
+
+   request.onsuccess = () => {
+       console.log(`Data fetched for ${stageName}:`, request.result);
+       callback(request.result);
+   };
+
+
+   request.onerror = (event) => {
+       console.error(`Error fetching data from ${stageName}:`, event.target.errorCode);
+   };
+}
+
+
+
+
+function fetchAllStagesData(stageNames, callback) {
+   const allData = [];
+   let stagesProcessed = 0;
+
+
+   stageNames.forEach(stageName => {
+       fetchStageData(stageName, (data) => {
+           allData.push({ stageName, data });
+           stagesProcessed++;
+
+
+           if (stagesProcessed === stageNames.length) {
+               callback(allData);
+           }
+       });
+   });
+}
+
+
+
+
+function showStageData(stageName) {
+   fetchStageData(stageName, (data) => {
+       alert(`Data for ${stageName}: ${JSON.stringify(data, null, 2)}`);
+       console.log(`Data for ${stageName}:`, data);
+   });
+}
+
+
+function showAllStagesData() {
+   const stageNames = Object.keys(STAGES);
+   fetchAllStagesData(stageNames, (allData) => {
+       alert(`All Stages Data: ${JSON.stringify(allData, null, 2)}`);
+       console.log("All Stages Data:", allData);
+   });
+}
+
+
+
+
+function showAllStagesData() {
+   const stageNames = Object.keys(STAGES);
+   fetchAllStagesData(stageNames, (allData) => {
+       alert(`All Stages Data: ${JSON.stringify(allData, null, 2)}`);
+       console.log("All Stages Data:", allData);
+   });
+}
+
+
+function clearGameData() {
+    const dbName = "gameDatabase";
+    const deleteRequest = indexedDB.deleteDatabase(dbName);
+
+    deleteRequest.onsuccess = () => {
+        console.log("IndexedDB cleared successfully.");
+        alert("Game data cleared!");
+    };
+
+    deleteRequest.onerror = (event) => {
+        console.error("Error clearing IndexedDB:", event.target.errorCode);
+        alert("Failed to clear game data!");
+    };
+
+    deleteRequest.onblocked = () => {
+        console.warn("Clear operation blocked. Please close other tabs using this site.");
+        alert("Clear operation blocked. Close other tabs to retry.");
+    };
+}
+
+
+
+function clearLocalStorage() {
+    localStorage.clear();
+    console.log("LocalStorage cleared.");
+    alert("Local storage cleared!");
+}
+
+
+
+function clearAllGameData() {
+        clearGameData();
+        clearLocalStorage();
+        alert("All game data has been cleared!");
+    }
+
+
+
+
+
+
+
+
+// Initialize database
+function initDB() {
+    const request = indexedDB.open("GameDatabase", 2);
+
+    request.onupgradeneeded = (event) => {
+        db = event.target.result;
+        const stages = ["stage1", "stage2", "stage3"]; // Update with your stages
+        
+        stages.forEach(stageName => {
+            if (!db.objectStoreNames.contains(stageName)) {
+                const store = db.createObjectStore(stageName, { keyPath: "id", autoIncrement: true });
+                
+                // Essential indices
+                store.createIndex("date", "date");
+                store.createIndex("user_id", "user_id");
+                store.createIndex("total_amount", "total_amount");
+                store.createIndex("shock_amount", "shock_amount");
+                store.createIndex("total_earning", "total_earning");
+                store.createIndex("speed_bonus", "speed_bonus");
+                store.createIndex("pre_shock_earnings", "pre_shock_earnings");
+                store.createIndex("amount_allocated_options", "amount_allocated_options");
+            }
+        });
+    };
+
+    request.onsuccess = (event) => {
+        db = event.target.result;
+        console.log("Database ready");
+    };
+
+    request.onerror = (event) => {
+        console.error("Database error:", event.target.error);
+    };
+}
+
+
+
+// Retrieve data for a stage
+function getStageData(stageName) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(stageName, "readonly");
+        const store = transaction.objectStore(stageName);
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+
+
+// function saveGameData() {
+//   const data = {
+//     stageName: currentStage, // Dynamic stage
+//     date: new Date().toISOString(),
+//     time: new Date().toLocaleTimeString(),
+//     user_id: getUserId(), // Replace with a function to fetch the actual user ID
+//     total_amount: calculateTotalAmount(), // Replace with actual function
+//     shock_amount: shockAmount, // Use actual shock amount
+//     total_earning: totalEarnings, // Use current earnings
+//     specific_option: getSelectedOption(), // Replace with the user's choice
+//     speed_bonus: calculateSpeedBonus(), // Replace with actual speed bonus
+//     pre_shock_earnings: preShockEarnings, // Use actual pre-shock earnings
+//     amount_allocated_options: allocations // Use actual allocation data
+//   };
+
+//   axios.post('/api/save-game-data', data)
+//     .then(response => {
+//       alert(response.data.message);
+//     })
+//     .catch(error => {
+//       console.error('Error saving game data:', error);
+//     });
+// }
+
+
+// At the top of your JS file, add the base URL for your API
+const API_BASE_URL = 'http://localhost:3005'; // Replace 3000 with your actual Express server port
+
+
+
+function saveGameData(stageData) {
+    console.log('Starting save operation with data:', stageData);
+    
+    return axios.post(`${API_BASE_URL}/api/save-game-data`, stageData)
+        .then(response => {
+            console.log('Server response:', response);
+            return response;
+        })
+        .catch(error => {
+            console.error('Save error:', error);
+            throw error;
+        });
+}
+
+
+    </script>
+</body>
+</html>

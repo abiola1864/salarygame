@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Adventure Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .scenario {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3 ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Trust Adventure Game</h1>
+        <div id="scenario" class="scenario">
+            <h2 id="scenario-title">Market Trader's Dilemma</h2>
+            <p id="scenario-description">You're a trader in a bustling marketplace. A potential partner offers a lucrative trade deal. What do you do?</p>
+        </div>
+        
+        <div id="buyer-stage">
+            <h3>Your Choices:</h3>
+            <div class="buttons">
+                <button onclick="buyerMove('Trust')">Trust the Trader</button>
+                <button onclick="buyerMove('Not trust')">Remain Cautious</button>
+            </div>
+        </div>
+
+        <div id="seller-stage" style="display:none;">
+            <h3>Partner's Response:</h3>
+            <div class="buttons">
+                <button onclick="sellerMove('Honor')">Honor the Agreement</button>
+                <button onclick="sellerMove('Abuse')">Seek Personal Gain</button>
+            </div>
+        </div>
+
+        <div id="result"></div>
+        <div id="progress"></div>
+    </div>
+
+    <script>
+        const SCENARIOS = [
+            {
+                title: "Market Trader's Dilemma",
+                description: "You're a trader in a bustling marketplace. A potential partner offers a lucrative trade deal. What do you do?",
+                successMessage: "Your trust pays off! The trader respects your agreement, and you both profit.",
+                betrayalMessage: "The trader exploits your trust, leaving you at a disadvantage."
+            },
+            {
+                title: "Startup Collaboration",
+                description: "A fellow entrepreneur proposes a joint venture with exciting potential. Will you invest your resources?",
+                successMessage: "Your collaborative spirit leads to mutual success and innovation!",
+                betrayalMessage: "The partnership crumbles, leaving your investment at risk."
+            },
+            {
+                title: "Research Partnership",
+                description: "A colleague offers to share groundbreaking research. Do you trust their proposal?",
+                successMessage: "By working together, you make a significant scientific breakthrough!",
+                betrayalMessage: "Your research insights are stolen, setting you back months."
+            }
+        ];
+
+        let currentScenario = 0;
+        let buyerChoice = "";
+        let totalMoney = 0; // Change from totalScore to totalMoney
+
+        function updateScenarioDisplay() {
+            const scenario = SCENARIOS[currentScenario];
+            document.getElementById('scenario-title').textContent = scenario.title;
+            document.getElementById('scenario-description').textContent = scenario.description;
+            
+            // Reset stages
+            document.getElementById('buyer-stage').style.display = 'block';
+            document.getElementById('seller-stage').style.display = 'none';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function buyerMove(choice) {
+            buyerChoice = choice;
+            if (choice === "Not trust") {
+                endScenario(false);
+            } else {
+                document.getElementById("buyer-stage").style.display = "none";
+                document.getElementById("seller-stage").style.display = "block";
+            }
+        }
+
+        function sellerMove(choice) {
+            const result = calculateOutcome(buyerChoice, choice);
+            endScenario(result.success, result.money);
+        }
+
+        function calculateOutcome(buyerChoice, sellerChoice) {
+            if (buyerChoice === "Not trust") {
+                return { success: false, money: 0, message: "You chose not to engage." };
+            }
+
+            if (buyerChoice === "Trust" && sellerChoice === "Honor") {
+                return { 
+                    success: true, 
+                    money: 500, // Reward for success
+                    message: SCENARIOS[currentScenario].successMessage 
+                };
+            }
+
+            if (buyerChoice === "Trust" && sellerChoice === "Abuse") {
+                return { 
+                    success: false, 
+                    money: -200, // Penalty for betrayal
+                    message: SCENARIOS[currentScenario].betrayalMessage 
+                };
+            }
+        }
+
+        function endScenario(success, money = 0) {
+            const result = document.getElementById('result');
+            const progress = document.getElementById('progress');
+            
+            totalMoney += money; // Add/subtract money based on the outcome
+
+            if (success) {
+                result.innerHTML = `<strong>Success!</strong> ${calculateOutcome(buyerChoice, success ? 'Honor' : 'Abuse').message}<br>Money earned: $${money}`;
+            } else {
+                result.innerHTML = `<strong>Challenge Failed</strong> ${calculateOutcome(buyerChoice, 'Abuse').message}<br>Money lost: $${money}`;
+            }
+
+            progress.innerHTML = `Total Money: $${totalMoney}`;
+
+            // Proceed to next scenario or end game
+            currentScenario++;
+            if (currentScenario < SCENARIOS.length) {
+                setTimeout(updateScenarioDisplay, 3000);
+            } else {
+                setTimeout(() => {
+                    result.innerHTML = `<strong>Game Complete!</strong><br>Your total money: $${totalMoney}`;
+                    document.getElementById('buyer-stage').style.display = 'none';
+                    document.getElementById('seller-stage').style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Initialize first scenario
+        updateScenarioDisplay();
+    </script>
+</body>
+</html>

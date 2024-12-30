@@ -1,0 +1,419 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Game Scenarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #scenario-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        #scenario-description {
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .failure {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Trust Game Scenarios</h1>
+        
+        <h2 id="scenario-title"></h2>
+        <p id="scenario-description"></p>
+        
+        <form id="trustGameForm">
+            <div class="form-group">
+                <label for="buyer_choice">Your Choice:</label>
+                <select id="buyer_choice" name="buyer_choice">
+                    <option value="Not Trust">Do Not Trust</option>
+                    <option value="Trust">Trust</option>
+                </select>
+            </div>
+            
+            <button type="submit">Make Decision</button>
+        </form>
+        
+        <div id="result"></div>
+        <div id="next-scenario" style="display:none;">
+            <button onclick="nextScenario()">Next Scenario</button>
+        </div>
+    </div>
+
+    <script>
+        const SCENARIOS = [
+            {
+                title: "Market Trader's Dilemma",
+                description: "You're a trader in a bustling marketplace. A potential partner offers a lucrative trade deal. What do you do?",
+                successMessage: "Your trust pays off! The trader respects your agreement, and you both profit.",
+                betrayalMessage: "The trader exploits your trust, leaving you at a disadvantage."
+            },
+            {
+                title: "Startup Collaboration",
+                description: "A fellow entrepreneur proposes a joint venture with exciting potential. Will you invest your resources?",
+                successMessage: "Your collaborative spirit leads to mutual success and innovation!",
+                betrayalMessage: "The partnership crumbles, leaving your investment at risk."
+            },
+            {
+                title: "Research Partnership",
+                description: "A colleague offers to share groundbreaking research. Do you trust their proposal?",
+                successMessage: "By working together, you make a significant scientific breakthrough!",
+                betrayalMessage: "Your research insights are stolen, setting you back months."
+            }
+        ];
+
+        let currentScenario = 0;
+        let totalMoney = 0;
+
+        function updateScenarioDisplay() {
+            const scenario = SCENARIOS[currentScenario];
+            document.getElementById('scenario-title').textContent = scenario.title;
+            document.getElementById('scenario-description').textContent = scenario.description;
+            
+            // Reset form and result
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('next-scenario').style.display = 'none';
+        }
+
+        document.getElementById('trustGameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const buyerChoice = document.getElementById('buyer_choice').value;
+            const resultDiv = document.getElementById('result');
+            const scenario = SCENARIOS[currentScenario];
+            
+            // Simulate the outcome with some randomness
+            const willBetray = Math.random() < 0.5;
+            
+            let resultMessage = '';
+            let resultClass = '';
+            
+            if (buyerChoice === 'Trust') {
+                if (!willBetray) {
+                    // Successful trust
+                    resultMessage = scenario.successMessage;
+                    resultClass = 'success';
+                    totalMoney += 100;
+                } else {
+                    // Betrayal
+                    resultMessage = scenario.betrayalMessage;
+                    resultClass = 'failure';
+                    totalMoney -= 50;
+                }
+            } else {
+                // Did not trust
+                resultMessage = "You chose not to engage, missing a potential opportunity.";
+                resultClass = 'failure';
+            }
+            
+            // Display result
+            resultDiv.innerHTML = `
+                <p class="${resultClass}">${resultMessage}</p>
+                <p>Total Money: $${totalMoney}</p>
+            `;
+            
+            // Show next scenario button
+            document.getElementById('next-scenario').style.display = 'block';
+        });
+
+        function nextScenario() {
+            currentScenario = (currentScenario + 1) % SCENARIOS.length;
+            updateScenarioDisplay();
+        }
+
+        // Initialize the first scenario
+        updateScenarioDisplay();
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictator's Allocation Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #scenario-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        #scenario-description {
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="number"], button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .failure {
+            color: red;
+        }
+        .category-allocation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .category-allocation label {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .category-allocation input {
+            width: 100px;
+        }
+        .progress-container {
+            margin-top: 15px;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            width: 0;
+            transition: width 0.3s;
+        }
+        .total-allocated {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Dictator's Allocation Game</h1>
+        
+        <h2 id="scenario-title"></h2>
+        <p id="scenario-description"></p>
+        
+        <form id="dictatorGameForm">
+            <p>Total Available Amount: N10,000</p>
+            <div id="allocation-inputs"></div>
+            
+            <button type="submit">Submit Allocation</button>
+        </form>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Total Allocation Text -->
+        <div id="total-allocated" class="total-allocated"></div>
+
+        <div id="result"></div>
+        <div id="next-scenario" style="display:none;">
+            <button onclick="nextScenario()">Next Scenario</button>
+        </div>
+    </div>
+
+    <script>
+        const SCENARIOS = [
+            {
+                title: "Tech Startup Funding",
+                description: "You're a venture capitalist with N10,000 to allocate across different investment opportunities.",
+                categories: ["AI Research", "Sustainable Tech", "Blockchain", "Cloud Computing", "Quantum Computing"]
+            },
+            {
+                title: "Nonprofit Resource Allocation",
+                description: "As a nonprofit director, you must strategically distribute $10,000 to maximize community impact.",
+                categories: ["Education Programs", "Healthcare Initiatives", "Youth Empowerment", "Environmental Conservation", "Community Infrastructure"]
+            },
+            {
+                title: "Personal Financial Planning",
+                description: "You've received a NGN10,000 bonus and need to allocate it wisely across different financial goals.",
+                categories: ["Emergency Fund", "Retirement Savings", "Personal Development", "Home Improvements", "Travel & Experiences"]
+            }
+        ];
+
+        let currentScenario = 0;
+
+        function updateScenarioDisplay() {
+            const scenario = SCENARIOS[currentScenario];
+            document.getElementById('scenario-title').textContent = scenario.title;
+            document.getElementById('scenario-description').textContent = scenario.description;
+
+            const allocationInputs = document.getElementById('allocation-inputs');
+            allocationInputs.innerHTML = scenario.categories.map(category => `
+                <div class="category-allocation">
+                    <label for="${category.toLowerCase().replace(/\s+/g, '_')}">${category}:</label>
+                    <input 
+                        type="number" 
+                        id="${category.toLowerCase().replace(/\s+/g, '_')}" 
+                        name="${category.toLowerCase().replace(/\s+/g, '_')}" 
+                        min="0" 
+                        max="10000" 
+                        step="1" 
+                        placeholder="Enter amount"
+                        oninput="updateProgressBar()"
+                    />
+                </div>
+            `).join('');
+        }
+
+        function updateProgressBar() {
+            const scenario = SCENARIOS[currentScenario];
+            const allocations = scenario.categories.map(category => {
+                const input = document.getElementById(category.toLowerCase().replace(/\s+/g, '_'));
+                return Number(input.value) || 0;
+            });
+
+            const totalAllocation = allocations.reduce((sum, value) => sum + value, 0);
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = Math.min((totalAllocation / 10000) * 100, 100); // Ensure it doesn't go above 100%
+            progressBar.style.width = progressPercentage + '%';
+
+            // Update the total allocation text
+            const totalAllocatedDiv = document.getElementById('total-allocated');
+            totalAllocatedDiv.textContent = `Total Allocated: $${totalAllocation.toFixed(2)}`;
+
+            // Check if the allocation exceeds $10,000
+            const resultMessage = totalAllocation > 10000
+                ? `<span class="failure">Error: Allocations exceed the total available amount of $10,000.</span>`
+                : (totalAllocation < 10000
+                    ? `<span class="failure"> Allocations should not be LESS or ABOVE NGN10,000.</span>`
+                    : `<span class="success">Success: You allocated the funds effectively!</span>`);
+
+            document.getElementById('result').innerHTML = resultMessage;
+        }
+
+        document.getElementById('dictatorGameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const scenario = SCENARIOS[currentScenario];
+            const allocations = scenario.categories.map(category => {
+                const input = document.getElementById(category.toLowerCase().replace(/\s+/g, '_'));
+                return Number(input.value) || 0;
+            });
+
+            const totalAllocation = allocations.reduce((sum, value) => sum + value, 0);
+            const resultDiv = document.getElementById('result');
+
+            if (totalAllocation > 10000) {
+                resultDiv.innerHTML = `<p class="failure">Error: Allocations exceed the total available amount of $10,000.</p>`;
+            } else if (totalAllocation < 10000) {
+                resultDiv.innerHTML = `<p class="failure">Error: Allocations do not use the total available amount of $10,000.</p>`;
+            } else {
+                resultDiv.innerHTML = `<p class="success">Success: You allocated the funds effectively!</p>`;
+                document.getElementById('next-scenario').style.display = 'block';
+            }
+        });
+
+        function nextScenario() {
+            currentScenario = (currentScenario + 1) % SCENARIOS.length;
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('next-scenario').style.display = 'none';
+            updateScenarioDisplay();
+        }
+
+        // Initialize the first scenario
+        updateScenarioDisplay();
+    </script>
+</body>
+</html>
