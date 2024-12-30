@@ -5,7 +5,7 @@ const path = require('path');
 const cors = require('cors');  // You'll need to npm install cors
 const gameRoutes = require('./routes/gameRoutes');
 const app = express();
-const PORT = process.env.PORT || 3040;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));  // Limit JSON payload size
