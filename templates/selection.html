@@ -124,6 +124,296 @@
                 grid-template-columns: repeat(3, 1fr);
             }
         }
+
+        .custom-option-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .custom-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .add-btn {
+            height: 36px;
+            padding: 0 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .add-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .custom-badge {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+
+        .error-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            display: none;
+            z-index: 1000;
+        }
+
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 16px 0;
+        }
+
+        .instruction {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .category-section {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-grid {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: 1fr;
+        }
+
+        .item-checkbox {
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            gap: 12px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+        }
+
+        label {
+            font-size: 0.95rem;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .continue-btn {
+            width: 100%;
+            height: 48px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+
+        .continue-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+            }
+            .item-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 900px;
+            }
+            .item-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* New styling for the additional info box */
+        .additional-info {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .additional-info h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+
+        .additional-info label {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .additional-info input,
+        .additional-info select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .additional-info select {
+            background-color: #fff;
+        }
+
+        .additional-info {
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .additional-info h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .additional-info label {
+        display: block;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .additional-info input,
+    .additional-info select {
+        width: 100%;
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+
+    .additional-info button {
+        width: 100%;
+        height: 48px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .additional-info button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+
+    .additional-info {
+    max-width: 100%;
+    margin: 24px auto;
+    padding: 16px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.additional-info h2 {
+    font-size: 1.3rem;
+    margin: 0 0 16px 0;
+    font-weight: 600;
+}
+
+.additional-info label {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.additional-info input,
+.additional-info select {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    background-color: #f8f9fa;
+}
+
+.additional-info select {
+    cursor: pointer;
+}
+
+@media (min-width: 768px) {
+    .additional-info {
+        max-width: 700px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .additional-info {
+        max-width: 900px;
+    }
+}
+    
+        
     </style>
 </head>
 <body>
@@ -134,14 +424,66 @@
                 <div class="instruction">🌟 Choose exactly 4 items from each category</div>
                 <div class="instruction">🛍️ These will shape your spending strategy</div>
                 <div class="instruction">🤖 Computer will randomly pick 2 items when the game starts</div>
+                <div class="instruction">🤖 You can input options from your spending without use the predefined</div>
                 <div class="instruction">💡 Selections may change during the game but will always be within the four items you choose here.</div>
             </div>
             <div id="categories-container"></div>
+        </div>
+
+        <div class="additional-info">
+            <h2> Additional Information</h2>
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" min="1" max="120" required>
+            
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        
+            <label for="level">Level at PIC:</label>
+            <select id="level" name="level" required>
+                <option value="">Select</option>
+                <option value="low">Junior</option>
+                <option value="mid">Mid</option>
+                <option value="high">Senior</option>
+            </select>
+        </div>
+
+        <!-- Button moved outside of .container -->
+        <div class="button-container">
             <button type="submit" id="continueButton" class="continue-btn" disabled>Continue to Game</button>
         </div>
     </form>
 
+    
+
     <script>
+
+
+document.getElementById('categoryForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Gather user input
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const level = document.getElementById('level').value;
+
+            if (!age || !gender || !level) {
+                alert("Please fill all the fields!");
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('userInfo', JSON.stringify({ age, gender, level }));
+
+            // Redirect to game.html
+            window.location.href = 'game.html';
+        });
+
+
+
         const SPENDING_CATEGORIES = {
             essentials: {
                 name: "Daily Needs",
@@ -211,81 +553,431 @@
             savings: []
         };
 
-        function createCategorySection(categoryKey, category) {
-            const section = document.createElement('div');
-            section.className = 'category-section';
+        function showError(message, duration = 3000) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        function isDuplicate(categoryKey, itemName) {
+            return SPENDING_CATEGORIES[categoryKey].items.some(
+                item => item.name.toLowerCase() === itemName.toLowerCase()
+            );
+        }
+
+
+
+
+
+
+        function createCustomOptionForm(categoryKey, category) {
+            const form = document.createElement('div');
+            form.className = 'custom-option-form';
             
-            const title = document.createElement('div');
-            title.className = 'category-title';
-            title.textContent = `${category.icon} ${category.name}`;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'custom-input';
+            input.placeholder = `Add custom ${category.name} option...`;
             
-            const itemGrid = document.createElement('div');
-            itemGrid.className = 'item-grid';
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'add-btn';
+            button.textContent = 'Add';
             
-            category.items.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'item-checkbox';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `${categoryKey}-${item.name}`;
-                checkbox.addEventListener('change', (event) => handleSelection(categoryKey, item.name, event));
-                
-                const label = document.createElement('label');
-                label.htmlFor = checkbox.id;
-                label.textContent = `${item.icon} ${item.name}`;
-                
-                itemDiv.appendChild(checkbox);
-                itemDiv.appendChild(label);
-                itemGrid.appendChild(itemDiv);
+            button.addEventListener('click', () => {
+                const itemName = input.value.trim();
+                if (itemName) {
+                    if (isDuplicate(categoryKey, itemName)) {
+                        showError('This option already exists in this category!');
+                        return;
+                    }
+                    addCustomOption(categoryKey, itemName);
+                    input.value = '';
+                }
             });
             
-            const error = document.createElement('div');
-            error.className = 'error-message';
-            error.id = `${categoryKey}-error`;
-            error.textContent = 'Please select exactly 4 items';
-            
-            section.appendChild(title);
-            section.appendChild(itemGrid);
-            section.appendChild(error);
-            
-            return section;
+            form.appendChild(input);
+            form.appendChild(button);
+            return form;
         }
 
-        function handleSelection(category, itemName, event) {
-            if (!selections[category].includes(itemName)) {
-                if (selections[category].length < 4) {
-                    selections[category].push(itemName);
-                } else {
-                    event.target.checked = false;
-                    document.getElementById(`${category}-error`).style.display = 'block';
-                    return;
-                }
-            } else {
-                selections[category] = selections[category].filter(item => item !== itemName);
+        function addCustomOption(categoryKey, itemName) {
+    // Add the custom item to SPENDING_CATEGORIES
+    SPENDING_CATEGORIES[categoryKey].items.push({
+        name: itemName,
+        icon: "✨" // Default icon for custom items
+    });
+
+    // Add the custom item to selections
+    if (!selections[categoryKey]) {
+        selections[categoryKey] = [];
+    }
+    selections[categoryKey].push(itemName);
+
+    // Update UI
+    const container = document.getElementById('categories-container');
+    const oldSection = document.querySelector(`.category-section[data-category="${categoryKey}"]`);
+    const newSection = createCategorySection(categoryKey, SPENDING_CATEGORIES[categoryKey]);
+    container.replaceChild(newSection, oldSection);
+
+    updateContinueButton();
+}
+
+
+
+
+
+
+
+function toggleSelection(categoryKey, itemName) {
+    if (!selections[categoryKey]) {
+        selections[categoryKey] = [];
+    }
+
+    const itemIndex = selections[categoryKey].indexOf(itemName);
+    if (itemIndex > -1) {
+        // If already selected, deselect it
+        selections[categoryKey].splice(itemIndex, 1);
+    } else {
+        // Otherwise, select it
+        selections[categoryKey].push(itemName);
+    }
+
+    console.log(`Updated selections for ${categoryKey}:`, selections[categoryKey]);
+}
+
+
+
+function renderCategories() {
+    const categoriesContainer = document.getElementById("categoriesContainer");
+    for (const categoryKey in SPENDING_CATEGORIES) {
+        const category = SPENDING_CATEGORIES[categoryKey];
+
+        const categorySection = document.createElement("div");
+        categorySection.id = `category-${categoryKey}`;
+        categorySection.className = "category-section";
+
+        category.items.forEach(item => {
+            const option = document.createElement("div");
+            option.className = "option";
+            option.textContent = item.name;
+            option.dataset.categoryKey = categoryKey;
+            option.dataset.itemName = item.name;
+
+            option.addEventListener("click", () => toggleSelection(categoryKey, item.name));
+            categorySection.appendChild(option);
+        });
+
+        categoriesContainer.appendChild(categorySection);
+    }
+}
+
+
+
+
+
+// Update the handleSelection function to properly track selections and update the button
+function handleSelection(category, itemName, event) {
+    if (!selections[category]) {
+        selections[category] = [];
+    }
+
+    if (event.target.checked) {
+        // Check if trying to select more than 4 items
+        if (selections[category].length >= 4) {
+            event.target.checked = false;
+            document.getElementById(`${category}-error`).style.display = 'block';
+            showError('You can only select 4 items per category');
+            return;
+        }
+        selections[category].push(itemName);
+    } else {
+        // Remove the item from selections
+        selections[category] = selections[category].filter(item => item !== itemName);
+    }
+    
+    // Update error message display
+    document.getElementById(`${category}-error`).style.display = 
+        selections[category].length === 4 ? 'none' : 'block';
+    
+    // Log current selections for debugging
+    console.log(`${category} selections:`, selections[category]);
+    
+    // Update continue button state
+    updateContinueButton();
+}
+
+
+
+
+       
+// Update the updateContinueButton function to properly check all categories
+function updateContinueButton() {
+    const requiredCategories = ['essentials', 'transport', 'lifestyle', 'savings'];
+    const isValid = requiredCategories.every(category => 
+        selections[category] && selections[category].length === 4
+    );
+    
+    const continueButton = document.getElementById('continueButton');
+    continueButton.disabled = !isValid;
+    
+    // Log button state for debugging
+    console.log('Button state:', isValid ? 'enabled' : 'disabled');
+    console.log('Current selections:', selections);
+}
+
+
+
+
+function createCategorySection(categoryKey, category) {
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    section.setAttribute('data-category', categoryKey);
+
+    const title = document.createElement('div');
+    title.className = 'category-title';
+    title.textContent = `${category.icon} ${category.name}`;
+
+    const customForm = createCustomOptionForm(categoryKey, category);
+
+    const itemGrid = document.createElement('div');
+    itemGrid.className = 'item-grid';
+
+    category.items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-checkbox';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `${categoryKey}-${item.name}`;
+        checkbox.checked = selections[categoryKey]?.includes(item.name) || false;
+
+        checkbox.addEventListener('change', (event) => {
+            handleSelection(categoryKey, item.name, event);
+        });
+
+        const label = document.createElement('label');
+        label.htmlFor = checkbox.id;
+        label.textContent = `${item.icon} ${item.name}`;
+
+        itemDiv.appendChild(checkbox);
+        itemDiv.appendChild(label);
+        itemGrid.appendChild(itemDiv);
+    });
+
+    const error = document.createElement('div');
+    error.className = 'error-message';
+    error.id = `${categoryKey}-error`;
+    error.textContent = 'Please select exactly 4 items';
+    error.style.display = selections[categoryKey]?.length === 4 ? 'none' : 'block';
+
+    section.appendChild(title);
+    section.appendChild(customForm);
+    section.appendChild(itemGrid);
+    section.appendChild(error);
+
+    return section;
+}
+
+
+
+
+// Add this to your initialization code to ensure selections object is properly initialized
+function initializeSelections() {
+    selections = {
+        essentials: [],
+        transport: [],
+        lifestyle: [],
+        savings: []
+    };
+}
+
+function saveSelectionsToLocalStorage() {
+    const categorySelections = {};
+
+    // Gather selections for all categories
+    Object.entries(SPENDING_CATEGORIES).forEach(([categoryKey, category]) => {
+        const selectedItems = category.items.filter(item =>
+            selections[categoryKey]?.includes(item.name)
+        );
+        categorySelections[categoryKey] = selectedItems; // Store selected items
+    });
+
+    // Save consolidated selections to localStorage
+    localStorage.setItem('categorySelections', JSON.stringify(categorySelections));
+}
+
+
+
+
+
+function loadSavedSelections() {
+    const savedSelections = localStorage.getItem('categorySelections');
+    if (savedSelections) {
+        const parsed = JSON.parse(savedSelections);
+        selections = parsed;
+
+        // Restore custom items to SPENDING_CATEGORIES
+        if (selections.customItems) {
+            Object.entries(selections.customItems).forEach(([categoryKey, items]) => {
+                items.forEach(item => {
+                    if (!SPENDING_CATEGORIES[categoryKey].items.some(existing => existing.name === item.name)) {
+                        SPENDING_CATEGORIES[categoryKey].items.push(item);
+                    }
+                });
+            });
+        }
+    }
+}
+
+
+
+// Modify the createCustomOptionForm function to integrate with existing selections
+function createCustomOptionForm(categoryKey, category) {
+    const form = document.createElement('div');
+    form.className = 'custom-option-form';
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'custom-input';
+    input.placeholder = `Add custom ${category.name} option...`;
+    
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'add-btn';
+    button.textContent = 'Add';
+    
+    button.addEventListener('click', () => {
+        const itemName = input.value.trim();
+        if (itemName) {
+            // Check for duplicates
+            if (SPENDING_CATEGORIES[categoryKey].items.some(item => 
+                item.name.toLowerCase() === itemName.toLowerCase())) {
+                alert('This option already exists in this category!');
+                return;
             }
             
-            document.getElementById(`${category}-error`).style.display = 'none';
-            updateContinueButton();
+            // Add new item directly to the category
+            SPENDING_CATEGORIES[categoryKey].items.push({
+                name: itemName,
+                icon: "✨"
+            });
+            
+            // Store the updated selections in categorySelections
+            localStorage.setItem('categorySelections', JSON.stringify(selections));
+            
+            // Refresh the section
+            const container = document.getElementById('categories-container');
+            const oldSection = document.querySelector(`.category-section[data-category="${categoryKey}"]`);
+            const newSection = createCategorySection(categoryKey, SPENDING_CATEGORIES[categoryKey]);
+            container.replaceChild(newSection, oldSection);
+            
+            input.value = '';
         }
+    });
+    
+    form.appendChild(input);
+    form.appendChild(button);
+    return form;
+}
 
-        function updateContinueButton() {
-            const isValid = Object.values(selections).every(items => items.length === 4);
-            const continueButton = document.getElementById('continueButton');
-            continueButton.disabled = !isValid;
-        }
+
+
 
         function initializeSelectionPage() {
             const container = document.getElementById('categories-container');
             Object.entries(SPENDING_CATEGORIES).forEach(([key, category]) => {
                 container.appendChild(createCategorySection(key, category));
+        
+        
+        
             });
 
-            document.getElementById('categoryForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                localStorage.setItem('categorySelections', JSON.stringify(selections));
-                window.location.href = 'start.html';
-            });
+
+
+            
+// Add this function to check if it's a fresh page load
+function isFreshPageLoad() {
+    return !document.referrer || 
+           !document.referrer.includes(window.location.hostname);
+}
+
+// Function to clear all relevant storage
+function clearAllStorage() {
+    localStorage.removeItem('categorySelections');
+    localStorage.removeItem('userSelections');
+    localStorage.removeItem('customItems');
+    // Reset selections object to initial state
+    selections = {
+        essentials: [],
+        transport: [],
+        lifestyle: [],
+        savings: [],
+        customItems: {}
+    };
+}
+
+
+
+// Update initialization function
+function initializeSelectionPage() {
+    if (isFreshPageLoad()) {
+        clearAllStorage();
+        initializeSelections();
+    } else {
+        const savedSelections = localStorage.getItem('categorySelections');
+        if (savedSelections) {
+            selections = JSON.parse(savedSelections);
+        } else {
+            initializeSelections();
+        }
+    }
+
+    const container = document.getElementById('categories-container');
+    container.innerHTML = '';
+    
+    Object.entries(SPENDING_CATEGORIES).forEach(([key, category]) => {
+        container.appendChild(createCategorySection(key, category));
+    });
+    
+    updateContinueButton();
+}
+
+
+
+
+// Update checkbox states based on selections
+function updateCheckboxes() {
+    Object.entries(selections).forEach(([category, items]) => {
+        items.forEach(itemName => {
+            const checkbox = document.getElementById(`${category}-${itemName}`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    });
+    updateContinueButton();
+}
+
+
+
+
+
+
+       // Update the form submission handler to store only selections
+// Update form submission to include both types of storage
+document.getElementById('categoryForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveSelectionsToLocalStorage(); // Save complete selections with custom items
+    localStorage.setItem('categorySelections', JSON.stringify(selections));
+    window.location.href = 'start.html';
+});
+
+
+
         }
 
         initializeSelectionPage();
