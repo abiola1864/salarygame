@@ -333,157 +333,297 @@ function updateScenarioAfterShock() {
 
 
 
+
+// Define base salaries for different levels
+const SALARY_LEVELS = {
+    'high': 300000,
+    'mid': 200000,
+    'low': 100000
+};
+
+// Function to get base salary from localStorage
+function getBaseSalary() {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    return SALARY_LEVELS[userInfo.level || 'low']; // Default to low if level not found
+}
+
+// Function to calculate stage salary based on percentage of base salary
+function calculateStageSalary(percentage) {
+    const baseSalary = getBaseSalary();
+    return Math.round(baseSalary * (percentage / 100));
+}
+
+
+
+// Salary progression tracker
+const SALARY_PROGRESSION = {
+    baseline: getBaseSalary(), // Initial N110,000
+
+    march: {
+        regular: getBaseSalary(), // Base N110,000
+        additional: Math.round(getBaseSalary() * 0.1), // N11,000
+        get total() { return this.regular + this.additional; } // N121,000 total
+    },
+
+    july: {
+        // Now 1.5x based on March's total (N121,000)
+        get regular() {
+            const marchTotal = SALARY_PROGRESSION.march.total;
+            return Math.round(marchTotal * 1); // ~N181,500
+        },
+        // Bonus based on new total
+        get bonus() {
+            const marchTotal = SALARY_PROGRESSION.march.total;
+            return Math.round(marchTotal * 0.2); // ~N24,200
+        },
+        get total() { return this.regular + this.bonus; } // ~N205,700
+    },
+
+    final: {
+        // 2.5x based on July's total (N205,700)
+        get amount() {
+            const julyTotal = SALARY_PROGRESSION.july.total;
+            return Math.round(julyTotal * 2.5); // ~N514,250
+        }
+    }
+};
+
+
+
 const STAGES = {
     'baseline': {
         title: '📊 January 2025',
-        description: `Welcome to January, my guy! 🌟
+        description: function() {
+            const salary = SALARY_PROGRESSION.baseline.toLocaleString();
+            return `Welcome to January, my guy! 🌟
 
-You've just received your 6,000 NGN salary. Ahhh, the good old' 6K! 😅 You know the drill — it's your regular monthly hustle, and now it's time to make it stretch! 😂😂
+Welcome to January! 🌟 You've got ₦{salary} to work with this month. Time to hustle! 😅 You may need to stretch it — skip that extra suya or take the okada instead of the bus. Be ready for those unexpected expenses, but you've got this! 💪 💸`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const salary = SALARY_PROGRESSION.baseline;
+            return `Chai! 😩 Life just threw you a curveball! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your budget!
 
-From food to transport, everything must fit within this amount. Sometimes you'll need to stretch it like chewing gum! 😜 Maybe you'll skip that extra portion of suya, or take the okada instead of the bus. Oh, and don't forget the random "emergency" expenses that pop up out of nowhere — *"Abeg, can you send me airtime? My phone don spoil!"* 🥲
+Now your ${salary.toLocaleString()} NGN is looking more like ${(salary - shockAmount).toLocaleString()} NGN. Time to put on your financial ninja skills! 🥷
 
-But, for now, you've got **6,000 NGN** to work with. We know you have many needs, but we've capped it to **two per category** for now. No worries, we're all in this together. 💪 You'll have the chance to plan for other things next month, but for now, let's see what you can do with this 6K.
-
-The month is in your hands! 💸`,
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Chai! 😩 Life just threw you a curveball! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your budget!
-
-Now your 6,000 NGN is looking more like ${(6000 - shockAmount).toLocaleString()} NGN. Time to put on your financial ninja skills! 🥷
-
-You'll need to adjust your budget to handle this surprise expense. Remember, every naira counts! Let's see how you navigate this challenge. 💪`,
-        base_salary: 6000,
-        shock_range: [1000, 2000],
+You'll need to adjust your budget to handle this surprise expense. Remember, every naira counts! Let's see how you navigate this challenge. 💪`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.baseline; },
+        get shock_range() { 
+            return [Math.round(this.base_salary * 0.05), Math.round(this.base_salary * 0.1)];
+        },
         framing: 'regular'
     },
+
     'description_page_condition_a': {
         title: '💰 March 2025 Preview',
-        description: `Bam! It's March, and we're marching into MONEY! 🎉
+        description: function() {
+            const regular = SALARY_PROGRESSION.march.regular;
+            const additional = SALARY_PROGRESSION.march.additional;
+            const total = SALARY_PROGRESSION.march.total;
+            return `Bam! It's March, and we're marching into MONEY! 🎉
 
-This month, you're not just getting the usual **6,000 NGN** salary. Oh no, you're getting an **extra 4,000 NGN**! That's a total of **10,000 NGN** to juggle for the month. 🤑
+This month, you're getting an extra ${additional.toLocaleString()} NGN on top of your usual ${regular.toLocaleString()} NGN, making it a total of ${total.toLocaleString()} NGN. 🤑
 
-But before you start planning to buy everything on Jumia, let's talk. That **extra 4,000 NGN** is an **ADDITIONAL PAYMENT** to cushion the economic times! Just a little something from the powers that be to help you survive this month. 💪
-
-Now, don't get too excited o, it's **temporary**! We no sabi how long this extra cash will last. 🙌 So enjoy it while it's here, but stay grounded. Save some for emergencies — after all, your aunty can still send that "Emergency Alert" message anytime. 😂`,
+But don’t get too excited — that extra cash is temporary, just a little help to get through tough times. Save some for emergencies, your aunty’s 'Emergency Alert' might pop up anytime! 😂`;
+        },
         isDescriptionPage: true
     },
+
     'condition_a': {
         title: '💸 March 2025 - Regular Salary',
-        description: 'Time to manage your regular salary of 6,000 NGN!',
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Eiya! 😧 Life happened! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your regular salary!
+        description: function() {
+            return `Time to manage your regular salary of ${SALARY_PROGRESSION.march.regular.toLocaleString()} NGN!`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const regular = SALARY_PROGRESSION.march.regular;
+            return `Eiya! 😧 Life happened! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your regular salary!
 
-Your 6,000 NGN salary is now ${(6000 - shockAmount).toLocaleString()} NGN. Time to adjust your plans! 💪
+Your ${regular.toLocaleString()} NGN salary is now ${(regular - shockAmount).toLocaleString()} NGN. Time to adjust your plans! 💪
 
-Show us how you handle this surprise expense. Every naira counts!`,
-        base_salary: 6000,
-        shock_range: [1000, 2000],
+Show us how you handle this surprise expense. Every naira counts!`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.march.regular; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.05), Math.round(this.base_salary * 0.1)];
+        },
         framing: 'regular'
     },
+
     'condition_a_additionalpayment': {
         title: '💸 March 2025 - Additional Payment',
-        description: 'Now, let\'s manage your additional payment of 4,000 NGN!',
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Chai! 😩 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your additional payment!
+        description: function() {
+            const additional = SALARY_PROGRESSION.march.additional;
+            return `Now, let's manage your additional payment of ${additional.toLocaleString()} NGN!`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const additional = SALARY_PROGRESSION.march.additional;
+            return `Chai! 😩 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your additional payment!
 
-Your 4,000 NGN additional payment is now ${(4000 - shockAmount).toLocaleString()} NGN. Let's see how you handle this! 💪
+Your ${additional.toLocaleString()} NGN additional payment is now ${(additional - shockAmount).toLocaleString()} NGN. Let's see how you handle this! 💪
 
-Time to show those money management skills!`,
-        base_salary: 4000,
-        shock_range: [1000, 2000],
+Time to show those money management skills!`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.march.additional; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.02), Math.round(this.base_salary * 0.05)];
+        },
         framing: 'regular'
     },
+
     'description_page_condition_b': {
         title: '🎉 Bonus Time Preview!',
-        description: `Bam, bam! Big win! 🎉
+        description: function() {
+            const previousTotal = SALARY_PROGRESSION.march.total;
+            const newRegular = SALARY_PROGRESSION.july.regular;
+            const bonusAmount = SALARY_PROGRESSION.july.bonus;
+            const total = SALARY_PROGRESSION.july.total;
+            return `Bam, bam! Big win! 🎉
 
-This month, you've got a special **meal bonus of 5,000 NGN**. So, in addition to your **10,000 NGN salary**, that's a total of **15,000 NGN** for this month! 💰
+Remember last month when you were managing **${previousTotal.toLocaleString()} NGN** in total? Well, things just got better! Your earnings is still **${newRegular.toLocaleString()} NGN**, AND you've got a special **meal bonus of ${bonusAmount.toLocaleString()} NGN**! 
+
+That brings your total to **${total.toLocaleString()} NGN** for this month! 💰
 
 It's a **meal bonus** just for you — a reward for all your hustle. Whether you decide to splurge on that special meal, clear bills, or stash it away for the rainy day, the choice is yours.
 
-Enjoy the bonus 🤑`,
+Enjoy the boost! 🤑`;
+        },
         isDescriptionPage: true,
         hasAnimation: true
     },
+
     'condition_b': {
         title: '💰 July 2025 - Regular Salary',
-        description: 'Time to manage your regular salary of 10,000 NGN!',
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Ah ah! 😫 Life comes at you fast! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your salary!
+        description: function() {
+            const previousTotal = SALARY_PROGRESSION.march.total;
+            const newRegular = SALARY_PROGRESSION.july.regular;
+            return `Your earnings have increased! From managing a total of ${previousTotal.toLocaleString()} NGN before, now you've got ${newRegular.toLocaleString()} NGN to work with!`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const regular = SALARY_PROGRESSION.july.regular;
+            return `Ah ah! 😫 Life comes at you fast! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your earnings!
 
-Your 10,000 NGN salary is now ${(10000 - shockAmount).toLocaleString()} NGN. Time to readjust! 💪
+Your ${regular.toLocaleString()} NGN is now ${(regular - shockAmount).toLocaleString()} NGN. Time to readjust! 💪
 
-Show us how you handle unexpected expenses with your upgraded salary!`,
-        base_salary: 10000,
-        shock_range: [2000, 3000],
+Show us how you handle unexpected expenses with your upgraded earnings!`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.july.regular; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.1), Math.round(this.base_salary * 0.15)];
+        },
         framing: 'regular'
     },
+
     'condition_b_bonus': {
         title: '🏅 July 2025 - Meal Bonus',
-        description: 'Now, let\'s manage your special meal bonus of 5,000 NGN!',
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Ewo! 😱 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your meal bonus!
+        description: function() {
+            const bonusAmount = SALARY_PROGRESSION.july.bonus;
+            return `Now, let's manage your special meal bonus of ${bonusAmount.toLocaleString()} NGN!`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const bonus = SALARY_PROGRESSION.july.bonus;
+            return `Ewo! 😱 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your meal bonus!
 
-Your 5,000 NGN bonus is now ${(5000 - shockAmount).toLocaleString()} NGN. Time to revise those plans!
+Your ${bonus.toLocaleString()} NGN bonus is now ${(bonus - shockAmount).toLocaleString()} NGN. Time to revise those plans!
 
-Let's see how you handle this surprise with your bonus money! 💪`,
-        base_salary: 5000,
-        shock_range: [1000, 2000],
+Let's see how you handle this surprise with your bonus money! 💪`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.july.bonus; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.05), Math.round(this.base_salary * 0.1)];
+        },
         framing: 'regular'
     },
+
     'condition_b1': {
         title: '💰 Lump Sum Salary and Bonus',
-        description: `This month, your salary and bonus are combined into a lump sum of **15,000 NGN**! 🎉
+        description: function() {
+            const total = SALARY_PROGRESSION.july.total;
+            return `This month, your salary and bonus are combined into a lump sum of **${total.toLocaleString()} NGN**! 🎉
 
-You're no longer juggling separate payments — this is the full package: salary and bonus rolled into one. 💰
+You're no longer juggling separate payments — this is the full package: your increased earnings and bonus rolled into one. 💰
 
 Enjoy the extra cushion, but be mindful of your spending! With this lump sum, you can still face surprises, so stay ready to adjust if life throws any unexpected expenses your way. 
 
-But for now, it's time to manage your **15,000 NGN** as one total. Keep your financial skills sharp! 💪`,
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Whoa! 😮 A surprise expense just hit! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your lump sum!
+But for now, it's time to manage your **${total.toLocaleString()} NGN** as one total. Keep your financial skills sharp! 💪`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const total = SALARY_PROGRESSION.july.total;
+            return `Whoa! 😮 A surprise expense just hit! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your lump sum!
 
-Now your **15,000 NGN** is down to ${(15000 - shockAmount).toLocaleString()} NGN. Time to recalculate and adjust!
+Now your **${total.toLocaleString()} NGN** is down to ${(total - shockAmount).toLocaleString()} NGN. Time to recalculate and adjust!
 
-Can you still manage with less? Show us how you handle unexpected expenses with this combined amount! 💸`,
-        base_salary: 15000,
-        shock_range: [2000, 4000],
+Can you still manage with less? Show us how you handle unexpected expenses with this combined amount! 💸`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.july.total; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.1), Math.round(this.base_salary * 0.2)];
+        },
         framing: 'lumpsum'
     },
+
     'condition_c': {
         title: '💰 Salary Increase Stage',
-        description: `Hold on tight! 🎉
+        description: function() {
+            const previousTotal = SALARY_PROGRESSION.july.total;
+            const newTotal = SALARY_PROGRESSION.final.amount;
+            const increase = newTotal - previousTotal;
+            return `Hold on tight! 🎉
 
-This month, your salary just got a serious upgrade! From **15,000 NGN** to **25,000 NGN**! That's right, **10,000 NGN extra** just for you!
+Your financial journey has been amazing! From managing **${previousTotal.toLocaleString()} NGN** last time, you're now stepping up to **${newTotal.toLocaleString()} NGN**! That's an extra **${increase.toLocaleString()} NGN** to work with!
+
+This isn't just a new salary — it's a reward for mastering your money management skills through all the ups and downs. You've learned to handle regular salaries, additional payments, bonuses, and even surprise expenses! 💪
 
 No more counting pennies or stretching the budget — you're officially living the good life! 💃
 
-Time to show off that new salary, spoil yourself a little, and celebrate your **hard work** paying off. 😎
+Time to show off those premium money management skills and celebrate your **hard work** paying off. 😎
 
-Enjoy the boost, because you absolutely deserve it! 💸`,
-        getPostShockDescription: (shockEvent, shockAmount) => `
-Even big salaries get reality checks! 😅 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} you didn't plan for!
+Enjoy the boost, because you absolutely deserve it! 💸`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const total = SALARY_PROGRESSION.final.amount;
+            return `Even big money needs careful management! 😅 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} you didn't plan for!
 
-Your fancy 25,000 NGN salary is now ${(25000 - shockAmount).toLocaleString()} NGN. Still impressive, but requires some tweaking!
+Your impressive ${total.toLocaleString()} NGN is now ${(total - shockAmount).toLocaleString()} NGN. Still substantial, but requires some tweaking!
 
-Show us how the wealthy handle unexpected expenses! 🎩 Time to flex those premium budgeting skills!`,
-        base_salary: 25000,
-        shock_range: [2000, 3000],
+Show us how you handle unexpected expenses with this upgraded lifestyle! 🎩`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.final.amount; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.1), Math.round(this.base_salary * 0.15)];
+        },
         framing: 'salary-increase'
     },
+
     'congratulations': {
         title: '🎉 Congratulations!',
-        description: `
-You've successfully completed all the stages of the Life Choices Game! 🏆
+        description: `You've successfully completed all the stages of the Life Choices Game! 🏆
+
 Well done!`,
         base_salary: 0,
         isDescriptionPage: true,
-    hasAnimation: true,
+        hasAnimation: true,
         framing: 'congratulations'
     }
 };
 
 
 
+// Function to update scenario description after shock event
+function updateScenarioAfterShock() {
+    const stage = STAGES[currentStage];
+    const currentStageData = stageData[currentStage];
+    
+    if (currentStageData && currentStageData.shockApplied) {
+        const shockEvent = selectedEvents.find(event => event.amount === shockAmount);
+        if (shockEvent) {
+            // Update the scenario description with the post-shock description
+            document.getElementById('scenario-description').innerHTML = 
+                stage.getPostShockDescription(shockEvent, shockAmount);
+        }
+    }
+}
+      
+      
 
 // Function to update scenario description after shock event
 function updateScenarioAfterShock() {
@@ -1042,6 +1182,8 @@ function updateTotalAmount(change) {
 //     updateStageIndicators();
 // }
 
+
+
 function updateInterface() {
     resetShockEvent();
 
@@ -1050,7 +1192,9 @@ function updateInterface() {
 
     // Update basic UI elements
     document.getElementById('scenario-title').textContent = stage.title;
-    document.getElementById('scenario-description').innerHTML = stage.description;
+    document.getElementById('scenario-description').innerHTML = typeof stage.description === 'function' 
+        ? stage.description() 
+        : stage.description;
 
     const allocationForm = document.getElementById('allocation-form');
     const progressContainer = document.querySelector('.progress-container');
@@ -1108,6 +1252,12 @@ function updateInterface() {
 
     updateStageIndicators();
 }
+
+
+
+
+
+
 
 
 
@@ -1733,318 +1883,6 @@ function getApiBaseUrl() {
 }
 
 
-
-// function handleSubmit() {
-//     if (validateAllocations()) {
-//         const stage = STAGES[currentStage];
-//         const categorySum = calculateCategoryEarnings();
-//         const preShockBonus = stage.additional_payment || 0;
-//         const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//         const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//         totalEarnings += preShockEarnings;
-//         preShockCategorySum = categorySum;
-
-//         if (speedBonus > 0) {
-//             alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//         }
-
-//         // Enhanced allocations structure
-//         const allocations = {};
-
-//         document.querySelectorAll('input[type="number"]').forEach(input => {
-//             const [categoryName, optionName] = input.name.split('_');
-//             if (!allocations[categoryName]) {
-//                 allocations[categoryName] = { total: 0, options: {} };
-//             }
-
-//             const value = parseInt(input.value) || 0;
-//             allocations[categoryName].total += value;
-//             allocations[categoryName].options[optionName] = value;
-//         });
-
-//         const stageDataToSave = {
-//             stageName: stage.name || currentStage, // Add stageName
-//             date: new Date().toLocaleDateString(),
-//             time: new Date().toLocaleTimeString(),
-//             user_id: "player1",
-//             total_amount: totalAmount,
-//             shock_amount: shockAmount,
-//             total_earning: totalEarnings,
-//             specific_option: "exampleOption",
-//             speed_bonus: speedBonus,
-//             pre_shock_earnings: preShockEarnings,
-//             amount_allocated_options: allocations
-//         };
-
-//         insertStageData(currentStage, stageDataToSave);
-//         clearInterval(timerInterval);
-
-//         if (!stageData[currentStage]?.shockApplied) {
-//             showShockEvent();
-//             stageData[currentStage] = { ...stageData[currentStage], shockApplied: true };
-//         } else {
-//             // Pass the stageDataToSave to saveGameData
-//             saveGameData(stageDataToSave)
-//                 .then(() => {
-//                     proceedToNextStage();
-//                 })
-//                 .catch(error => {
-//                     console.error('Failed to save game data:', error);
-//                     // Handle error appropriately
-//                 });
-//         }
-//     }
-// }
-
-
-
-// function handleSubmit() {
-//     if (!validateAllocations()) {
-//         return; // Stop further processing if validation fails
-//     }
-
-//     const stage = STAGES[currentStage];
-//     const categorySum = calculateCategoryEarnings();
-//     const preShockBonus = stage.additional_payment || 0;
-//     const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//     // Calculate total earnings for this stage
-//     const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//     totalEarnings += preShockEarnings;
-//     preShockCategorySum = categorySum; // Save category earnings for reference
-
-//     // Notify user about speed bonus
-//     if (speedBonus > 0) {
-//         alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//     }
-
-//     // Build enhanced allocation structure
-//     const allocations = {};
-//     document.querySelectorAll('input[type="number"]').forEach(input => {
-//         const [categoryName, optionName] = input.name.split('_');
-//         if (!allocations[categoryName]) {
-//             allocations[categoryName] = { total: 0, options: {} };
-//         }
-//         const value = parseInt(input.value) || 0;
-//         allocations[categoryName].total += value;
-//         allocations[categoryName].options[optionName] = value;
-//     });
-
-//     // Save current stage data
-//     const stageDataToSave = {
-//         stageName: stage.name || currentStage,
-//         date: new Date().toLocaleDateString(),
-//         time: new Date().toLocaleTimeString(),
-//         user_id: "player1",
-//         total_amount: totalAmount,
-//         shock_amount: shockAmount,
-//         total_earning: totalEarnings,
-//         specific_option: "exampleOption",
-//         speed_bonus: speedBonus,
-//         pre_shock_earnings: preShockEarnings,
-//         amount_allocated_options: allocations
-//     };
-
-//     insertStageData(currentStage, stageDataToSave); // Save locally for immediate access
-//     clearInterval(timerInterval); // Stop the timer for the stage
-
-//     if (!stageData[currentStage]?.shockApplied) {
-//         // Show shock event if not already handled
-//         showShockEvent();
-//         stageData[currentStage] = { ...stageData[currentStage], shockApplied: true };
-//     } else {
-//         // Save game data and proceed to next stage
-//         saveGameData(stageDataToSave)
-//             .then(() => {
-//                 console.log('Game data saved successfully. Proceeding to next stage.');
-//                 proceedToNextStage();
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save game data:', error);
-//                 alert('Error saving game data. Please try again.');
-//             });
-//     }
-// }
-
-
-
-
-
-
-// function handleSubmit() {
-//     if (!validateAllocations()) {
-//         return;
-//     }
-
-//     const stage = STAGES[currentStage];
-//     const categorySum = calculateCategoryEarnings();
-//     const preShockBonus = stage.additional_payment || 0;
-//     const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//     const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//     totalEarnings += preShockEarnings;
-//     preShockCategorySum = categorySum;
-
-//     if (speedBonus > 0) {
-//         alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//     }
-
-//     // Build allocation structure
-//     const allocations = {};
-//     document.querySelectorAll('input[type="number"]').forEach(input => {
-//         const [categoryName, optionName] = input.name.split('_');
-//         if (!allocations[categoryName]) {
-//             allocations[categoryName] = { total: 0, options: {} };
-//         }
-//         const value = parseInt(input.value) || 0;
-//         allocations[categoryName].total += value;
-//         allocations[categoryName].options[optionName] = value;
-//     });
-
-//     const stageDataToSave = {
-//         stageName: stage.name || currentStage,
-//         date: new Date().toLocaleDateString(),
-//         time: new Date().toLocaleTimeString(),
-//         user_id: "player1",
-//         total_amount: totalAmount,
-//         shock_amount: shockAmount,
-//         total_earning: totalEarnings,
-//         specific_option: "exampleOption",
-//         speed_bonus: speedBonus,
-//         pre_shock_earnings: preShockEarnings,
-//         amount_allocated_options: allocations,
-//         is_post_shock: stageData[currentStage]?.shockApplied || false // Track shock state
-//     };
-
-//     insertStageData(currentStage, stageDataToSave);
-//     clearInterval(timerInterval);
-
-//     if (!stageData[currentStage]?.shockApplied) {
-//         // Pre-shock submission
-//         saveGameData({ ...stageDataToSave, is_post_shock: false })
-//             .then(() => {
-//                 console.log('Pre-shock data saved successfully');
-//                 showShockEvent();
-//                 stageData[currentStage] = { 
-//                     ...stageData[currentStage], 
-//                     shockApplied: true 
-//                 };
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save pre-shock data:', error);
-//                 alert('Error saving pre-shock data. Please try again.');
-//             });
-//     } else if (!stageData[currentStage]?.adjustmentSubmitted) {
-//         // Post-shock submission
-//         stageData[currentStage] = {
-//             ...stageData[currentStage],
-//             adjustmentSubmitted: true
-//         };
-//         saveGameData({ ...stageDataToSave, is_post_shock: true })
-//             .then(() => {
-//                 console.log('Post-shock data saved successfully');
-//                 proceedToNextStage();
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save post-shock data:', error);
-//                 alert('Error saving post-shock data. Please try again.');
-//             });
-//     }
-// }
-
-
-
-
-
-    
-
-
-// function handleSubmit() {
-//     if (!validateAllocations()) {
-//         return; // Stop further processing if validation fails
-//     }
-
-//     const stage = STAGES[currentStage];
-//     const categorySum = calculateCategoryEarnings();
-//     const preShockBonus = stage.additional_payment || 0;
-//     const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//     // Calculate total earnings for this stage
-//     const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//     totalEarnings += preShockEarnings;
-//     preShockCategorySum = categorySum; // Save category earnings for reference
-
-//     // Notify user about speed bonus
-//     if (speedBonus > 0) {
-//         alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//     }
-
-//     // Build enhanced allocation structure
-//     const allocations = {};
-//     document.querySelectorAll('input[type="number"]').forEach(input => {
-//         const [categoryName, optionName] = input.name.split('_');
-//         if (!allocations[categoryName]) {
-//             allocations[categoryName] = { total: 0, options: {} };
-//         }
-//         const value = parseInt(input.value) || 0;
-//         allocations[categoryName].total += value;
-//         allocations[categoryName].options[optionName] = value;
-//     });
-
-//     // Save current stage data
-//     const stageDataToSave = {
-//         stageName: stage.name || currentStage,
-//         date: new Date().toLocaleDateString(),
-//         time: new Date().toLocaleTimeString(),
-//         user_id: "player1",
-//         total_amount: totalAmount,
-//         shock_amount: shockAmount,
-//         total_earning: totalEarnings,
-//         specific_option: "exampleOption",
-//         speed_bonus: speedBonus,
-//         pre_shock_earnings: preShockEarnings,
-//         amount_allocated_options: allocations
-//     };
-
-//     insertStageData(currentStage, stageDataToSave); // Save locally for immediate access
-//     clearInterval(timerInterval); // Stop the timer for the stage
-
-//     // Handle pre-shock and post-shock submissions
-//     if (!stageData[currentStage]?.shockApplied) {
-//         // Handle pre-shock submission
-//         saveGameData(stageDataToSave, false) // false indicates pre-shock data
-//             .then(() => {
-//                 console.log('Pre-shock data saved successfully.');
-//                 showShockEvent();
-//                 stageData[currentStage] = { 
-//                     ...stageData[currentStage], 
-//                     shockApplied: true 
-//                 };
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save pre-shock data:', error);
-//                 alert('Error saving pre-shock data. Please try again.');
-//             });
-//     } else if (!stageData[currentStage]?.adjustmentSubmitted) {
-//         // Handle post-shock submission
-//         stageData[currentStage] = {
-//             ...stageData[currentStage],
-//             adjustmentSubmitted: true
-//         };
-//         saveGameData(stageDataToSave, true) // true indicates post-shock data
-//             .then(() => {
-//                 console.log('Post-shock data saved successfully. Proceeding to next stage.');
-//                 proceedToNextStage();
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save post-shock data:', error);
-//                 alert('Error saving game data. Please try again.');
-//             });
-//     }
-// }
-
-
 function handleSubmit() {
     if (!validateAllocations()) {
         return;
@@ -2335,26 +2173,34 @@ newSubmitButton.addEventListener('click', function (e) {
 
 
 
+// Declare stageSequence as a global variable
+let stageSequence = [];
 
+// Modified event listener to set global stageSequence
 document.addEventListener('DOMContentLoaded', function() {
-    // Check for required data
-
-    const stageSequence = localStorage.getItem('stageSequence');
-    
-    if (!stageSequence) {
-        alert('Required game data missing! Redirecting to the start page.');
+    try {
+        const savedStageSequence = localStorage.getItem('stageSequence');
+        if (!savedStageSequence) {
+            alert('Required game data missing! Redirecting to the start page.');
+            window.location.href = 'start.html';
+            return;
+        }
+        
+        // Parse and validate the stage sequence
+        stageSequence = JSON.parse(savedStageSequence);
+        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+            throw new Error('Invalid stage sequence format');
+        }
+        
+        // Initialize the game if all required data is present
+        initializeGame();
+    } catch (error) {
+        console.error('Error loading stage sequence:', error);
+        alert('Error loading game data! Redirecting to start page.');
         window.location.href = 'start.html';
-        return;
     }
-    
-    // Initialize the game if all required data is present
-    initializeGame();
 });
 
-
-
-
-// Update your existing initializeGame function
 function initializeGame(selections) {
     totalEarnings = 0;
 
@@ -2382,10 +2228,13 @@ function initializeGame(selections) {
     );
 
     try {
-        const stageSequence = JSON.parse(localStorage.getItem('stageSequence'));
+        // Use the global stageSequence
         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
             throw new Error('Invalid stage sequence');
         }
+
+        // Log the stage sequence to verify its correctness
+        console.log('Current stage sequence:', stageSequence);
 
         currentStage = stageSequence[0];
         stageData[currentStage] = { shockApplied: false, shockAmount: 0 };
@@ -2396,6 +2245,9 @@ function initializeGame(selections) {
         }
 
         updateInterface();
+        
+        // Start the timer for the first stage
+        startTimer();
     } catch (error) {
         console.error('Error initializing game:', error);
         alert('Error initializing game! Returning to start page.');
@@ -2409,39 +2261,60 @@ function initializeGame(selections) {
 
 
 // Add window.onload event listener at the end of game.html
-window.addEventListener('load', function() {
-    // Check if selections exist
+window.addEventListener('load', function () {
     const selections = localStorage.getItem('categorySelections');
+
     if (!selections) {
-        // Redirect to selection page if no selections are found
+        // Redirect if no selections found
         window.location.href = 'selection.html';
         return;
     }
-    
-    // Initialize game if selections exist
-    const gameHeader = document.createElement('div');
-    gameHeader.className = 'game-header';
-   
-    document.querySelector('.game-container').insertBefore(
-        gameHeader,
-        document.querySelector('.stage-indicator')
-    );
-    
+
+    const parsedSelections = JSON.parse(selections);
+    console.log("Loaded categorySelections:", parsedSelections);
+
+    Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
+        if (SPENDING_CATEGORIES[categoryKey]) {
+            SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
+                const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
+                return predefinedItem || { name, icon: "✨" }; // Use default icon only for custom items
+            });
+        } else {
+            console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
+        }
+    });
+
+    console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
+
+    // Initialize the game UI
     updateInterface();
 });
 
 
 
 
+
 const SHOCK_EVENTS = [
-    { text: "Surprise! Your friend's birthday party is tomorrow. Time to buy a gift! 🎁", amount: 1500 },
-    { text: "PHCN has disconnected your electricity without notice. Emergency reconnection needed! ⚡", amount: 2000 },
-    { text: "Your phone screen cracked. Quick repair needed for work! 📱", amount: 1800 },
-    { text: "Unexpected transportation fare increase this week! 🚌", amount: 1200 },
-    { text: "Emergency medical consultation needed! 🏥", amount: 1700 },
-    { text: "Surprise family visit - need to stock up on groceries! 🛒", amount: 1300 },
-    { text: "Your favorite food vendor increased prices! 🍲", amount: 1100 },
-    { text: "Water supply issues - need to buy from water truck! 💧", amount: 1600 },
+    { text: "Surprise! Your friend's birthday party is tomorrow. Time to buy a gift! 🎁", amount: 15000 },
+    { text: "PHCN has disconnected your electricity without notice. Emergency reconnection needed! ⚡", amount: 20000 },
+    { text: "Your phone screen cracked. Quick repair needed for work! 📱", amount: 18000 },
+    { text: "Unexpected transportation fare increase this week! 🚌", amount: 12000 },
+    { text: "Emergency medical consultation needed! 🏥", amount: 17000 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Surprise family visit - need to stock up on groceries! 🛒", amount: 13000 },
+    { text: "Your favorite food vendor increased prices! 🍲", amount: 11000 },
+    { text: "Water supply issues - need to buy from water truck! 💧", amount: 16000 },
     { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
     { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 }
 ];
@@ -2992,6 +2865,9 @@ function getStageData(stageName) {
 //     });
 // }
 
+
+      
+      
 function saveGameData(data, isPostShock = false) {
     return new Promise((resolve, reject) => {
         try {
