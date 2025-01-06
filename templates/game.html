@@ -395,9 +395,7 @@ const STAGES = {
         title: '📊 January 2025',
         description: function() {
             const salary = SALARY_PROGRESSION.baseline.toLocaleString();
-            return `Welcome to January, my guy! 🌟
-
-Welcome to January! 🌟 You've got ₦{salary} to work with this month. Time to hustle! 😅 You may need to stretch it — skip that extra suya or take the okada instead of the bus. Be ready for those unexpected expenses, but you've got this! 💪 💸`;
+            return `Welcome to January, my guy! 🌟 You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const salary = SALARY_PROGRESSION.baseline;
@@ -422,9 +420,11 @@ You'll need to adjust your budget to handle this surprise expense. Remember, eve
             const total = SALARY_PROGRESSION.march.total;
             return `Bam! It's March, and we're marching into MONEY! 🎉
 
-This month, you're getting an extra ${additional.toLocaleString()} NGN on top of your usual ${regular.toLocaleString()} NGN, making it a total of ${total.toLocaleString()} NGN. 🤑
+This month, you're not just getting your usual **${regular.toLocaleString()} NGN** salary. Oh no, you're getting an **extra ${additional.toLocaleString()} NGN**! That's a total of **${total.toLocaleString()} NGN** to juggle for the month. 🤑
 
-But don’t get too excited — that extra cash is temporary, just a little help to get through tough times. Save some for emergencies, your aunty’s 'Emergency Alert' might pop up anytime! 😂`;
+But before you start planning to buy everything on Jumia, let's talk. That **extra ${additional.toLocaleString()} NGN** is an **ADDITIONAL PAYMENT** to cushion the economic times! Just a little something from the powers that be to help you survive this month. 💪
+
+Now, don't get too excited o, it's **temporary**! We no sabi how long this extra cash will last. 🙌 So enjoy it while it's here, but stay grounded. Save some for emergencies — after all, your aunty can still send that "Emergency Alert" message anytime. 😂`;
         },
         isDescriptionPage: true
     },
