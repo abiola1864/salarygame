@@ -88,52 +88,53 @@
         };
 
         // Initialize the game start process
-        document.getElementById('startButton').addEventListener('click', async () => {
-            const startButton = document.getElementById('startButton');
-            const groupMessage = document.getElementById('groupMessage');
-            const loading = document.getElementById('loading');
+     document.getElementById('startButton').addEventListener('click', async () => {
+    const startButton = document.getElementById('startButton');
+    const groupMessage = document.getElementById('groupMessage');
+    const loading = document.getElementById('loading');
 
-            try {
-                // Disable button to prevent multiple clicks
-                startButton.disabled = true;
-                
-                // Randomly assign the user to a group (1 or 2)
-                const group = Math.random() < 0.5 ? 1 : 2;
+    try {
+        startButton.disabled = true;
 
-                // Store group and stage sequence
-                localStorage.setItem('selectedGroup', group);
-                localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
+        if (!gameConfig || !gameConfig.groups) {
+            throw new Error('Game configuration missing');
+        }
 
-                // Show group assignment message
-                groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
-                loading.classList.add('visible');
+        const group = Math.random() < 0.5 ? 1 : 2;
 
-                // Verify data was stored correctly
-                const storedGroup = localStorage.getItem('selectedGroup');
-                const storedSequence = localStorage.getItem('stageSequence');
+        if (!gameConfig.groups[group]) {
+            throw new Error(`Invalid group assignment: ${group}`);
+        }
 
-                if (!storedGroup || !storedSequence) {
-                    throw new Error('Failed to store game data');
-                }
+        localStorage.setItem('selectedGroup', group);
+        localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
 
-                // Redirect after showing message
-                setTimeout(() => {
-                    window.location.href = 'game.html';
-                }, 2000);
+        console.log('Stored Group:', group);
+        console.log('Stored Stage Sequence:', localStorage.getItem('stageSequence'));
 
-            } catch (error) {
-                console.error('Error starting game:', error);
-                groupMessage.textContent = 'Error starting game. Please try again.';
-                startButton.disabled = false;
-                loading.classList.remove('visible');
-            }
-        });
+        groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
+        loading.classList.add('visible');
 
-        // Clear any existing game data when the start page loads
-        window.addEventListener('load', () => {
-            localStorage.removeItem('selectedGroup');
-            localStorage.removeItem('stageSequence');
-        });
+        setTimeout(() => {
+            window.location.href = 'game.html';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error starting game:', error);
+        groupMessage.textContent = 'Error starting game. Please try again.';
+        startButton.disabled = false;
+        loading.classList.remove('visible');
+    }
+});
+
+window.addEventListener('load', () => {
+    console.log('Clearing old game data...');
+    localStorage.removeItem('selectedGroup');
+    localStorage.removeItem('stageSequence');
+});
+
+      
+      
     </script>
 </body>
 </html>

@@ -2204,8 +2204,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
       
-      
-function initializeGame(selections) {
+  function initializeGame(selections) {
     totalEarnings = 0;
 
     // Create game header
@@ -2219,20 +2218,33 @@ function initializeGame(selections) {
             Time Remaining: <span id="timer">3:00</span>
         </div>
     `;
-    
+
     const gameContainer = document.querySelector('.game-container');
     if (!gameContainer) {
         console.error('Game container not found!');
         return;
     }
-    
-    gameContainer.insertBefore(
-        gameHeader,
-        document.querySelector('.stage-indicator')
-    );
+
+    // Get the stage indicator element - make sure it exists first
+    const stageIndicator = document.querySelector('.stage-indicator');
+    if (!stageIndicator) {
+        console.error('Stage indicator not found!');
+        return;
+    }
+
+    gameContainer.insertBefore(gameHeader, stageIndicator);
 
     try {
-        // Use the global stageSequence
+        // Check if stageSequence exists and is valid
+        if (typeof stageSequence === 'undefined') {
+            // Try to get it from localStorage
+            const storedSequence = localStorage.getItem('stageSequence');
+            if (!storedSequence) {
+                throw new Error('Stage sequence not found in localStorage');
+            }
+            stageSequence = JSON.parse(storedSequence);
+        }
+
         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
             throw new Error('Invalid stage sequence');
         }
@@ -2241,7 +2253,10 @@ function initializeGame(selections) {
         console.log('Current stage sequence:', stageSequence);
 
         currentStage = stageSequence[0];
-        stageData[currentStage] = { shockApplied: false, shockAmount: 0 };
+        stageData[currentStage] = {
+            shockApplied: false,
+            shockAmount: 0
+        };
 
         // Apply selections if provided
         if (selections) {
@@ -2249,16 +2264,15 @@ function initializeGame(selections) {
         }
 
         updateInterface();
-        
-        // Start the timer for the first stage
         startTimer();
     } catch (error) {
-        console.error('Error initializing game:', error);
+        console.error('Error initializing game:', error.message);
         alert('Error initializing game! Returning to start page.');
         window.location.href = 'start.html';
     }
 }
-
+      
+      
 
 
 
