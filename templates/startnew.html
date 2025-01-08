@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            color: white;
+            text-align: center;
+        }
+
+        .start-container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background: #ff7f50;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #ff5722;
+        }
+
+        .group-message {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #ffcccb;
+        }
+
+        /* Add loading indicator styles */
+        .loading {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .loading.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="start-container">
+        <h1>Welcome to the Salary Allocation Game</h1>
+        <p>Select "Start Game" to begin your journey through the stages!</p>
+        <button id="startButton">Start Game</button>
+        <div id="groupMessage" class="group-message"></div>
+        <div id="loading" class="loading">Loading game data...</div>
+    </div>
+
+    <script>
+        // Game configuration
+        const gameConfig = {
+            groups: {
+                1: ['baseline', 'description_page_condition_a', 'condition_a', 'condition_a_additionalpayment', 
+                    'description_page_condition_b', 'condition_b1', 'condition_c', 'congratulations'],
+                2: ['baseline', 'description_page_condition_a', 'condition_a', 'condition_a_additionalpayment', 
+                    'description_page_condition_b', 'condition_b', 'condition_b_bonus', 'condition_c', 'congratulations']
+            }
+        };
+
+        // Initialize the game start process
+ 
+document.getElementById('startButton').addEventListener('click', async () => {
+    const startButton = document.getElementById('startButton');
+    const groupMessage = document.getElementById('groupMessage');
+    const loading = document.getElementById('loading');
+
+    try {
+        startButton.disabled = true;
+
+        if (!gameConfig || !gameConfig.groups) {
+            throw new Error('Game configuration missing');
+        }
+
+        const group = Math.random() < 0.5 ? 1 : 2;
+
+        if (!gameConfig.groups[group]) {
+            throw new Error(`Invalid group assignment: ${group}`);
+        }
+
+        // Store the group and stage sequence
+        localStorage.setItem('selectedGroup', group.toString());
+        localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
+
+        console.log('Stored Group:', group);
+        console.log('Stored Stage Sequence:', localStorage.getItem('stageSequence'));
+
+        groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
+        loading.classList.add('visible');
+
+        // Add a small delay to ensure localStorage is set before navigation
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verify data was stored correctly before redirecting
+        const storedSequence = localStorage.getItem('stageSequence');
+        const storedGroup = localStorage.getItem('selectedGroup');
+        
+        if (!storedSequence || !storedGroup) {
+            throw new Error('Failed to store game data');
+        }
+
+        setTimeout(() => {
+            window.location.href = 'game.html';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error starting game:', error);
+        groupMessage.textContent = 'Error starting game. Please try again.';
+        startButton.disabled = false;
+        loading.classList.remove('visible');
+    }
+});
+
+      
+      
+// Only clear the localStorage when starting a new game session
+window.addEventListener('load', () => {
+    // Check if this is a fresh start (not coming from another page)
+    if (!document.referrer || !document.referrer.includes(window.location.hostname)) {
+        console.log('New session detected - Clearing old game data...');
+        localStorage.removeItem('selectedGroup');
+        localStorage.removeItem('stageSequence');
+    } else {
+        console.log('Continuing existing session - Preserving game data');
+    }
+});
+      
+      
+      
+    </script>
+</body>
+</html>
