@@ -2588,37 +2588,59 @@ function initializeGame(selections) {
 
 
 // Add window.onload event listener at the end of game.html
-window.addEventListener('load', function () {
-    const selections = localStorage.getItem('categorySelections');
-
-    if (!selections) {
-        // Redirect if no selections found
+window.addEventListener('load', function() {
+    // 1. Load all required data
+    const categorySelections = localStorage.getItem('categorySelections');
+    const selectedGroup = localStorage.getItem('selectedGroup');
+    const storedStageSequence = localStorage.getItem('stageSequence');
+    
+    // 2. Validate all required data exists
+    if (!categorySelections || !selectedGroup || !storedStageSequence) {
+        console.error('Missing required game data:', {
+            hasSelections: !!categorySelections,
+            hasGroup: !!selectedGroup,
+            hasSequence: !!storedStageSequence
+        });
+        alert('Missing game data. Returning to selection page.');
         window.location.href = 'selection.html';
         return;
     }
 
-    const parsedSelections = JSON.parse(selections);
-    console.log("Loaded categorySelections:", parsedSelections);
+    // 3. Parse and process selections
+    try {
+        const parsedSelections = JSON.parse(categorySelections);
+        stageSequence = JSON.parse(storedStageSequence);
+        
+        console.log('Game Initialization Data:', {
+            selections: parsedSelections,
+            group: selectedGroup,
+            sequence: stageSequence
+        });
 
-    Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
-        if (SPENDING_CATEGORIES[categoryKey]) {
-            SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
-                const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
-                return predefinedItem || { name, icon: "✨" }; // Use default icon only for custom items
-            });
-        } else {
-            console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
-        }
-    });
+        // Update SPENDING_CATEGORIES with selections
+        Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
+            if (SPENDING_CATEGORIES[categoryKey]) {
+                SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
+                    const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
+                    return predefinedItem || { name, icon: "✨" };
+                });
+            } else {
+                console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
+            }
+        });
 
-    console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
-
-    // Initialize the game UI
-    updateInterface();
+        console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
+        
+        // 4. Initialize game with verified data
+        initializeGame(parsedSelections);
+    } catch (error) {
+        console.error('Error parsing game data:', error);
+        alert('Error loading game data. Please try again.');
+        window.location.href = 'selection.html';
+    }
 });
-
-
-
+      
+      
 
 
 const SHOCK_EVENTS = [
