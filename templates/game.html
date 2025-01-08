@@ -2181,29 +2181,30 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         const savedStageSequence = localStorage.getItem('stageSequence');
         if (!savedStageSequence) {
+            console.warn('stageSequence missing in localStorage');
             alert('Required game data missing! Redirecting to the start page.');
             window.location.href = 'start.html';
             return;
         }
-        
-        // Parse and validate the stage sequence
+
+        // Parse and validate stageSequence
         stageSequence = JSON.parse(savedStageSequence);
         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+            console.error('Invalid stage sequence:', stageSequence);
             throw new Error('Invalid stage sequence format');
         }
-        
-        // Initialize the game if all required data is present
+
+        // Proceed with game initialization
         initializeGame();
     } catch (error) {
-        console.error('Error loading stage sequence:', error);
+        console.error('Error loading stage sequence:', error.message);
         alert('Error loading game data! Redirecting to start page.');
         window.location.href = 'start.html';
     }
 });
-      
-      
-      
 
+      
+      
 function initializeGame(selections) {
     totalEarnings = 0;
 
