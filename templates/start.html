@@ -88,7 +88,8 @@
         };
 
         // Initialize the game start process
-     document.getElementById('startButton').addEventListener('click', async () => {
+ 
+document.getElementById('startButton').addEventListener('click', async () => {
     const startButton = document.getElementById('startButton');
     const groupMessage = document.getElementById('groupMessage');
     const loading = document.getElementById('loading');
@@ -106,7 +107,8 @@
             throw new Error(`Invalid group assignment: ${group}`);
         }
 
-        localStorage.setItem('selectedGroup', group);
+        // Store the group and stage sequence
+        localStorage.setItem('selectedGroup', group.toString());
         localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
 
         console.log('Stored Group:', group);
@@ -114,6 +116,17 @@
 
         groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
         loading.classList.add('visible');
+
+        // Add a small delay to ensure localStorage is set before navigation
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verify data was stored correctly before redirecting
+        const storedSequence = localStorage.getItem('stageSequence');
+        const storedGroup = localStorage.getItem('selectedGroup');
+        
+        if (!storedSequence || !storedGroup) {
+            throw new Error('Failed to store game data');
+        }
 
         setTimeout(() => {
             window.location.href = 'game.html';
@@ -127,12 +140,20 @@
     }
 });
 
+      
+      
+// Only clear the localStorage when starting a new game session
 window.addEventListener('load', () => {
-    console.log('Clearing old game data...');
-    localStorage.removeItem('selectedGroup');
-    localStorage.removeItem('stageSequence');
+    // Check if this is a fresh start (not coming from another page)
+    if (!document.referrer || !document.referrer.includes(window.location.hostname)) {
+        console.log('New session detected - Clearing old game data...');
+        localStorage.removeItem('selectedGroup');
+        localStorage.removeItem('stageSequence');
+    } else {
+        console.log('Continuing existing session - Preserving game data');
+    }
 });
-
+      
       
       
     </script>

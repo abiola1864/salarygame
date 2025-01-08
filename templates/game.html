@@ -645,9 +645,10 @@ function updateScenarioAfterShock() {
 
 
 
-let currentStage = 'baseline';
+ let currentStage = '';
 let totalAmount = 0;
 let totalEarnings = 0;
+const stageData = {};
 let timerInterval;
 let timeRemaining = 180; // 3 minutes in seconds
 
@@ -2204,89 +2205,80 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
       
-  function initializeGame(selections) {
-    totalEarnings = 0;
+  
+      
+      
+ // Initialize game function with better error handling
+        function initializeGame() {
+            try {
+                console.log('Initializing game...');
+                
+                // Validate required data
+                const savedStageSequence = localStorage.getItem('stageSequence');
+                const categorySelections = localStorage.getItem('categorySelections');
+                
+                if (!savedStageSequence || !categorySelections) {
+                    throw new Error('Missing required game data');
+                }
 
-    // Create game header
-    const gameHeader = document.createElement('div');
-    gameHeader.className = 'game-header';
-    gameHeader.innerHTML = `
-        <div class="earnings-display">
-            Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
-        </div>
-        <div class="timer">
-            Time Remaining: <span id="timer">3:00</span>
-        </div>
-    `;
+                // Parse and validate stage sequence
+                stageSequence = JSON.parse(savedStageSequence);
+                if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+                    throw new Error('Invalid stage sequence format');
+                }
 
-    const gameContainer = document.querySelector('.game-container');
-    if (!gameContainer) {
-        console.error('Game container not found!');
-        return;
-    }
+                // Set initial stage
+                currentStage = stageSequence[0];
+                console.log('Current stage:', currentStage);
 
-    // Get the stage indicator element - make sure it exists first
-    const stageIndicator = document.querySelector('.stage-indicator');
-    if (!stageIndicator) {
-        console.error('Stage indicator not found!');
-        return;
-    }
+                // Initialize stage data
+                stageData[currentStage] = {
+                    shockApplied: false,
+                    shockAmount: 0
+                };
 
-    gameContainer.insertBefore(gameHeader, stageIndicator);
+                // Create and insert game header
+                const gameHeader = document.createElement('div');
+                gameHeader.className = 'game-header';
+                gameHeader.innerHTML = `
+                    <div class="earnings-display">
+                        Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
+                    </div>
+                    <div class="timer">
+                        Time Remaining: <span id="timer">3:00</span>
+                    </div>
+                `;
 
-    try {
-        // Check if stageSequence exists and is valid
-        if (typeof stageSequence === 'undefined') {
-            // Try to get it from localStorage
-            const storedSequence = localStorage.getItem('stageSequence');
-            if (!storedSequence) {
-                throw new Error('Stage sequence not found in localStorage');
+                const gameContainer = document.querySelector('.game-container');
+                const stageIndicator = document.querySelector('.stage-indicator');
+                
+                if (!gameContainer || !stageIndicator) {
+                    throw new Error('Required DOM elements not found');
+                }
+
+                gameContainer.insertBefore(gameHeader, stageIndicator);
+                
+                console.log('Game initialized successfully');
+                return true;
+
+            } catch (error) {
+                console.error('Game initialization error:', error);
+                alert(`Error initializing game: ${error.message}`);
+                window.location.href = 'start.html';
+                return false;
             }
-            stageSequence = JSON.parse(storedSequence);
         }
 
-        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
-            throw new Error('Invalid stage sequence');
-        }
-
-        // Log the stage sequence to verify its correctness
-        console.log('Current stage sequence:', stageSequence);
-
-        currentStage = stageSequence[0];
-        stageData[currentStage] = {
-            shockApplied: false,
-            shockAmount: 0
-        };
-
-        // Apply selections if provided
-        if (selections) {
-            applySelections(selections);
-        }
-
-        updateInterface();
-        startTimer();
-    } catch (error) {
-        console.error('Error initializing game:', error.message);
-        alert('Error initializing game! Returning to start page.');
-        window.location.href = 'start.html';
-    }
-}
+        // Main execution
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Starting initialization...');
+            initializeGame();
+        });
       
       
 
 
 
-
-
-// Add window.onload event listener at the end of game.html
-window.addEventListener('load', function () {
-    const selections = localStorage.getItem('categorySelections');
-
-    if (!selections) {
-        // Redirect if no selections found
-        window.location.href = 'selection.html';
-        return;
-    }
 
     const parsedSelections = JSON.parse(selections);
     console.log("Loaded categorySelections:", parsedSelections);
