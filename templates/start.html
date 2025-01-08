@@ -87,53 +87,61 @@
             }
         };
 
-        // Initialize the game start process
-        document.getElementById('startButton').addEventListener('click', async () => {
-            const startButton = document.getElementById('startButton');
-            const groupMessage = document.getElementById('groupMessage');
-            const loading = document.getElementById('loading');
+       document.getElementById('startButton').addEventListener('click', async () => {
+    const startButton = document.getElementById('startButton');
+    const groupMessage = document.getElementById('groupMessage');
+    const loading = document.getElementById('loading');
 
-            try {
-                // Disable button to prevent multiple clicks
-                startButton.disabled = true;
-                
-                // Randomly assign the user to a group (1 or 2)
-                const group = Math.random() < 0.5 ? 1 : 2;
-
-                // Store group and stage sequence
-                localStorage.setItem('selectedGroup', group);
-                localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
-
-                // Show group assignment message
-                groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
-                loading.classList.add('visible');
-
-                // Verify data was stored correctly
-                const storedGroup = localStorage.getItem('selectedGroup');
-                const storedSequence = localStorage.getItem('stageSequence');
-
-                if (!storedGroup || !storedSequence) {
-                    throw new Error('Failed to store game data');
-                }
-
-                // Redirect after showing message
-                setTimeout(() => {
-                    window.location.href = 'game.html';
-                }, 2000);
-
-            } catch (error) {
-                console.error('Error starting game:', error);
-                groupMessage.textContent = 'Error starting game. Please try again.';
-                startButton.disabled = false;
-                loading.classList.remove('visible');
-            }
+    try {
+        // Log initial state
+        console.log('Initial localStorage:', {
+            categorySelections: localStorage.getItem('categorySelections'),
+            stageSequence: localStorage.getItem('stageSequence'),
+            selectedGroup: localStorage.getItem('selectedGroup')
+        });
+        
+        startButton.disabled = true;
+        const group = Math.random() < 0.5 ? 1 : 2;
+        
+        // Store group and stage sequence
+        localStorage.setItem('selectedGroup', group);
+        localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
+        
+        // Log after storing new data
+        console.log('After storing game data:', {
+            categorySelections: localStorage.getItem('categorySelections'),
+            stageSequence: localStorage.getItem('stageSequence'),
+            selectedGroup: localStorage.getItem('selectedGroup')
         });
 
-        // Clear any existing game data when the start page loads
-        window.addEventListener('load', () => {
-            localStorage.removeItem('selectedGroup');
-            localStorage.removeItem('stageSequence');
-        });
+        groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
+        loading.classList.add('visible');
+
+        setTimeout(() => {
+            window.location.href = 'game.html';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error starting game:', error);
+        groupMessage.textContent = 'Error starting game. Please try again.';
+        startButton.disabled = false;
+        loading.classList.remove('visible');
+    }
+});
+
+// Remove this window.onload handler if it exists, as it's clearing needed data
+// window.addEventListener('load', () => {
+//     localStorage.removeItem('selectedGroup');
+//     localStorage.removeItem('stageSequence');
+// });
+      
+      
+
+//         // Clear any existing game data when the start page loads
+//         window.addEventListener('load', () => {
+//             localStorage.removeItem('selectedGroup');
+//             localStorage.removeItem('stageSequence');
+//         });
     </script>
 </body>
 </html>

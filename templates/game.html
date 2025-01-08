@@ -333,6 +333,7 @@ function updateScenarioAfterShock() {
 
 
 
+
 // Define base salaries for different levels
 const SALARY_LEVELS = {
     'Senior': 1200000,
@@ -606,9 +607,23 @@ Well done!`,
 };
 
 
-      
-      
 
+// Function to update scenario description after shock event
+function updateScenarioAfterShock() {
+    const stage = STAGES[currentStage];
+    const currentStageData = stageData[currentStage];
+    
+    if (currentStageData && currentStageData.shockApplied) {
+        const shockEvent = selectedEvents.find(event => event.amount === shockAmount);
+        if (shockEvent) {
+            // Update the scenario description with the post-shock description
+            document.getElementById('scenario-description').innerHTML = 
+                stage.getPostShockDescription(shockEvent, shockAmount);
+        }
+    }
+}
+      
+      
 
 // Function to update scenario description after shock event
 function updateScenarioAfterShock() {
@@ -630,9 +645,10 @@ function updateScenarioAfterShock() {
 
 
 
-let currentStage = 'baseline';
+ let currentStage = '';
 let totalAmount = 0;
 let totalEarnings = 0;
+const stageData = {};
 let timerInterval;
 let timeRemaining = 180; // 3 minutes in seconds
 
@@ -1166,12 +1182,8 @@ function updateTotalAmount(change) {
 
 //     updateStageIndicators();
 // }
-      
-      
-     
-      
-      
-      
+
+
 
 function updateInterface() {
     resetShockEvent();
@@ -1241,6 +1253,18 @@ function updateInterface() {
 
     updateStageIndicators();
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1328,65 +1352,30 @@ let preShockCategorySum = 0; // Variable to track the initial category sum befor
 
 
 function proceedToNextStage() {
-    try {
-        // Stop the current timer
-        clearInterval(timerInterval);
+    // Stop the current timer
+    clearInterval(timerInterval);
 
-        const categorySum = calculateCategoryEarnings(); // Calculate category earnings
-        const speedBonus = timeRemaining > 0 ? 500 : 0; // Apply speed bonus if applicable
+    const categorySum = calculateCategoryEarnings(); // Calculate category earnings
+    const speedBonus = timeRemaining > 0 ? 500 : 0; // Apply speed bonus if applicable
 
-        // Display earnings breakdown
-        showEarningsBreakdown(categorySum, speedBonus);
+    // Display earnings breakdown
+    showEarningsBreakdown(categorySum, speedBonus);
 
-        // Validate stage sequence before proceeding
-        if (!Array.isArray(stageSequence)) {
-            throw new Error('Stage sequence is not properly initialized');
-        }
+    // Transition to the next stage
+    const stageSequence = Object.keys(STAGES);
+    const currentIndex = stageSequence.indexOf(currentStage);
 
-        // Get current stage index
-        const currentIndex = stageSequence.indexOf(currentStage);
-        if (currentIndex === -1) {
-            throw new Error('Current stage not found in sequence');
-        }
+    if (currentIndex < stageSequence.length - 1) {
+        currentStage = stageSequence[currentIndex + 1];
+       
+        updateInterface();
 
-        if (currentIndex < stageSequence.length - 1) {
-            // Move to next stage
-            currentStage = stageSequence[currentIndex + 1];
-            
-            // Initialize stage data if needed
-            if (!stageData[currentStage]) {
-                stageData[currentStage] = { shockApplied: false, shockAmount: 0 };
-            }
-            
-            updateInterface();
-
-            // Restart the timer for the new stage
-            startTimer();
-            
-            console.log(`Proceeding to stage: ${currentStage}`);
-        } else {
-            // End of game logic
-            const gameComplete = document.getElementById('game-complete');
-            if (gameComplete) {
-                gameComplete.style.display = 'block';
-            }
-            
-            // Save final game state
-            try {
-                localStorage.setItem('finalGameState', JSON.stringify({
-                    totalEarnings,
-                    completedStages: stageSequence,
-                    timestamp: new Date().toISOString()
-                }));
-            } catch (saveError) {
-                console.error('Error saving final game state:', saveError);
-            }
-            
-            alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
-        }
-    } catch (error) {
-        console.error('Error in proceedToNextStage:', error);
-        alert('An error occurred while proceeding to the next stage. Please refresh the page or contact support.');
+        // Restart the timer for the new stage
+        startTimer();
+    } else {
+        // End of game logic
+        document.getElementById('game-complete').style.display = 'block';
+        alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
     }
 }
 
@@ -1888,326 +1877,11 @@ function showEarningsBreakdown(preShockCategorySum, speedBonus) {
 // const isProd = window.location.hostname !== 'localhost';
 // const API_BASE_URL = isProd ? '' : 'http://localhost:3080';
 
+
 function getApiBaseUrl() {
-    // Using port 5500 for development server
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://127.0.0.1:5500';
-    }
-    return 'https://your-production-api.com'; // Replace with your actual production URL when ready
+    const isLocalhost = window.location.hostname === 'localhost';
+    return isLocalhost ? 'http://localhost:3000' : window.location.origin;
 }
-
-
-
-
-// function handleSubmit() {
-//     if (validateAllocations()) {
-//         const stage = STAGES[currentStage];
-//         const categorySum = calculateCategoryEarnings();
-//         const preShockBonus = stage.additional_payment || 0;
-//         const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//         const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//         totalEarnings += preShockEarnings;
-//         preShockCategorySum = categorySum;
-
-//         if (speedBonus > 0) {
-//             alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//         }
-
-//         // Enhanced allocations structure
-//         const allocations = {};
-
-//         document.querySelectorAll('input[type="number"]').forEach(input => {
-//             const [categoryName, optionName] = input.name.split('_');
-//             if (!allocations[categoryName]) {
-//                 allocations[categoryName] = { total: 0, options: {} };
-//             }
-
-//             const value = parseInt(input.value) || 0;
-//             allocations[categoryName].total += value;
-//             allocations[categoryName].options[optionName] = value;
-//         });
-
-//         const stageDataToSave = {
-//             stageName: stage.name || currentStage, // Add stageName
-//             date: new Date().toLocaleDateString(),
-//             time: new Date().toLocaleTimeString(),
-//             user_id: "player1",
-//             total_amount: totalAmount,
-//             shock_amount: shockAmount,
-//             total_earning: totalEarnings,
-//             specific_option: "exampleOption",
-//             speed_bonus: speedBonus,
-//             pre_shock_earnings: preShockEarnings,
-//             amount_allocated_options: allocations
-//         };
-
-//         insertStageData(currentStage, stageDataToSave);
-//         clearInterval(timerInterval);
-
-//         if (!stageData[currentStage]?.shockApplied) {
-//             showShockEvent();
-//             stageData[currentStage] = { ...stageData[currentStage], shockApplied: true };
-//         } else {
-//             // Pass the stageDataToSave to saveGameData
-//             saveGameData(stageDataToSave)
-//                 .then(() => {
-//                     proceedToNextStage();
-//                 })
-//                 .catch(error => {
-//                     console.error('Failed to save game data:', error);
-//                     // Handle error appropriately
-//                 });
-//         }
-//     }
-// }
-
-
-
-// function handleSubmit() {
-//     if (!validateAllocations()) {
-//         return; // Stop further processing if validation fails
-//     }
-
-//     const stage = STAGES[currentStage];
-//     const categorySum = calculateCategoryEarnings();
-//     const preShockBonus = stage.additional_payment || 0;
-//     const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//     // Calculate total earnings for this stage
-//     const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//     totalEarnings += preShockEarnings;
-//     preShockCategorySum = categorySum; // Save category earnings for reference
-
-//     // Notify user about speed bonus
-//     if (speedBonus > 0) {
-//         alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//     }
-
-//     // Build enhanced allocation structure
-//     const allocations = {};
-//     document.querySelectorAll('input[type="number"]').forEach(input => {
-//         const [categoryName, optionName] = input.name.split('_');
-//         if (!allocations[categoryName]) {
-//             allocations[categoryName] = { total: 0, options: {} };
-//         }
-//         const value = parseInt(input.value) || 0;
-//         allocations[categoryName].total += value;
-//         allocations[categoryName].options[optionName] = value;
-//     });
-
-//     // Save current stage data
-//     const stageDataToSave = {
-//         stageName: stage.name || currentStage,
-//         date: new Date().toLocaleDateString(),
-//         time: new Date().toLocaleTimeString(),
-//         user_id: "player1",
-//         total_amount: totalAmount,
-//         shock_amount: shockAmount,
-//         total_earning: totalEarnings,
-//         specific_option: "exampleOption",
-//         speed_bonus: speedBonus,
-//         pre_shock_earnings: preShockEarnings,
-//         amount_allocated_options: allocations
-//     };
-
-//     insertStageData(currentStage, stageDataToSave); // Save locally for immediate access
-//     clearInterval(timerInterval); // Stop the timer for the stage
-
-//     if (!stageData[currentStage]?.shockApplied) {
-//         // Show shock event if not already handled
-//         showShockEvent();
-//         stageData[currentStage] = { ...stageData[currentStage], shockApplied: true };
-//     } else {
-//         // Save game data and proceed to next stage
-//         saveGameData(stageDataToSave)
-//             .then(() => {
-//                 console.log('Game data saved successfully. Proceeding to next stage.');
-//                 proceedToNextStage();
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save game data:', error);
-//                 alert('Error saving game data. Please try again.');
-//             });
-//     }
-// }
-
-
-
-
-
-
-// function handleSubmit() {
-//     if (!validateAllocations()) {
-//         return;
-//     }
-
-//     const stage = STAGES[currentStage];
-//     const categorySum = calculateCategoryEarnings();
-//     const preShockBonus = stage.additional_payment || 0;
-//     const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//     const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//     totalEarnings += preShockEarnings;
-//     preShockCategorySum = categorySum;
-
-//     if (speedBonus > 0) {
-//         alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//     }
-
-//     // Build allocation structure
-//     const allocations = {};
-//     document.querySelectorAll('input[type="number"]').forEach(input => {
-//         const [categoryName, optionName] = input.name.split('_');
-//         if (!allocations[categoryName]) {
-//             allocations[categoryName] = { total: 0, options: {} };
-//         }
-//         const value = parseInt(input.value) || 0;
-//         allocations[categoryName].total += value;
-//         allocations[categoryName].options[optionName] = value;
-//     });
-
-//     const stageDataToSave = {
-//         stageName: stage.name || currentStage,
-//         date: new Date().toLocaleDateString(),
-//         time: new Date().toLocaleTimeString(),
-//         user_id: "player1",
-//         total_amount: totalAmount,
-//         shock_amount: shockAmount,
-//         total_earning: totalEarnings,
-//         specific_option: "exampleOption",
-//         speed_bonus: speedBonus,
-//         pre_shock_earnings: preShockEarnings,
-//         amount_allocated_options: allocations,
-//         is_post_shock: stageData[currentStage]?.shockApplied || false // Track shock state
-//     };
-
-//     insertStageData(currentStage, stageDataToSave);
-//     clearInterval(timerInterval);
-
-//     if (!stageData[currentStage]?.shockApplied) {
-//         // Pre-shock submission
-//         saveGameData({ ...stageDataToSave, is_post_shock: false })
-//             .then(() => {
-//                 console.log('Pre-shock data saved successfully');
-//                 showShockEvent();
-//                 stageData[currentStage] = { 
-//                     ...stageData[currentStage], 
-//                     shockApplied: true 
-//                 };
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save pre-shock data:', error);
-//                 alert('Error saving pre-shock data. Please try again.');
-//             });
-//     } else if (!stageData[currentStage]?.adjustmentSubmitted) {
-//         // Post-shock submission
-//         stageData[currentStage] = {
-//             ...stageData[currentStage],
-//             adjustmentSubmitted: true
-//         };
-//         saveGameData({ ...stageDataToSave, is_post_shock: true })
-//             .then(() => {
-//                 console.log('Post-shock data saved successfully');
-//                 proceedToNextStage();
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save post-shock data:', error);
-//                 alert('Error saving post-shock data. Please try again.');
-//             });
-//     }
-// }
-
-
-
-
-
-    
-
-
-// function handleSubmit() {
-//     if (!validateAllocations()) {
-//         return; // Stop further processing if validation fails
-//     }
-
-//     const stage = STAGES[currentStage];
-//     const categorySum = calculateCategoryEarnings();
-//     const preShockBonus = stage.additional_payment || 0;
-//     const speedBonus = timeRemaining > 0 ? 500 : 0;
-
-//     // Calculate total earnings for this stage
-//     const preShockEarnings = categorySum + preShockBonus + speedBonus;
-//     totalEarnings += preShockEarnings;
-//     preShockCategorySum = categorySum; // Save category earnings for reference
-
-//     // Notify user about speed bonus
-//     if (speedBonus > 0) {
-//         alert(`Speed bonus achieved! +₦${speedBonus.toLocaleString()}`);
-//     }
-
-//     // Build enhanced allocation structure
-//     const allocations = {};
-//     document.querySelectorAll('input[type="number"]').forEach(input => {
-//         const [categoryName, optionName] = input.name.split('_');
-//         if (!allocations[categoryName]) {
-//             allocations[categoryName] = { total: 0, options: {} };
-//         }
-//         const value = parseInt(input.value) || 0;
-//         allocations[categoryName].total += value;
-//         allocations[categoryName].options[optionName] = value;
-//     });
-
-//     // Save current stage data
-//     const stageDataToSave = {
-//         stageName: stage.name || currentStage,
-//         date: new Date().toLocaleDateString(),
-//         time: new Date().toLocaleTimeString(),
-//         user_id: "player1",
-//         total_amount: totalAmount,
-//         shock_amount: shockAmount,
-//         total_earning: totalEarnings,
-//         specific_option: "exampleOption",
-//         speed_bonus: speedBonus,
-//         pre_shock_earnings: preShockEarnings,
-//         amount_allocated_options: allocations
-//     };
-
-//     insertStageData(currentStage, stageDataToSave); // Save locally for immediate access
-//     clearInterval(timerInterval); // Stop the timer for the stage
-
-//     // Handle pre-shock and post-shock submissions
-//     if (!stageData[currentStage]?.shockApplied) {
-//         // Handle pre-shock submission
-//         saveGameData(stageDataToSave, false) // false indicates pre-shock data
-//             .then(() => {
-//                 console.log('Pre-shock data saved successfully.');
-//                 showShockEvent();
-//                 stageData[currentStage] = { 
-//                     ...stageData[currentStage], 
-//                     shockApplied: true 
-//                 };
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save pre-shock data:', error);
-//                 alert('Error saving pre-shock data. Please try again.');
-//             });
-//     } else if (!stageData[currentStage]?.adjustmentSubmitted) {
-//         // Handle post-shock submission
-//         stageData[currentStage] = {
-//             ...stageData[currentStage],
-//             adjustmentSubmitted: true
-//         };
-//         saveGameData(stageDataToSave, true) // true indicates post-shock data
-//             .then(() => {
-//                 console.log('Post-shock data saved successfully. Proceeding to next stage.');
-//                 proceedToNextStage();
-//             })
-//             .catch(error => {
-//                 console.error('Failed to save post-shock data:', error);
-//                 alert('Error saving game data. Please try again.');
-//             });
-//     }
-// }
 
 
 function handleSubmit() {
@@ -2508,27 +2182,33 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         const savedStageSequence = localStorage.getItem('stageSequence');
         if (!savedStageSequence) {
+            console.warn('stageSequence missing in localStorage');
             alert('Required game data missing! Redirecting to the start page.');
             window.location.href = 'start.html';
             return;
         }
-        
-        // Parse and validate the stage sequence
+
+        // Parse and validate stageSequence
         stageSequence = JSON.parse(savedStageSequence);
         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+            console.error('Invalid stage sequence:', stageSequence);
             throw new Error('Invalid stage sequence format');
         }
-        
-        // Initialize the game if all required data is present
+
+        // Proceed with game initialization
         initializeGame();
     } catch (error) {
-        console.error('Error loading stage sequence:', error);
+        console.error('Error loading stage sequence:', error.message);
         alert('Error loading game data! Redirecting to start page.');
         window.location.href = 'start.html';
     }
 });
 
-function initializeGame(selections) {
+      
+  
+      
+      
+      function initializeGame(selections) {
     totalEarnings = 0;
 
     // Create game header
@@ -2542,20 +2222,33 @@ function initializeGame(selections) {
             Time Remaining: <span id="timer">3:00</span>
         </div>
     `;
-    
+
     const gameContainer = document.querySelector('.game-container');
     if (!gameContainer) {
         console.error('Game container not found!');
         return;
     }
-    
-    gameContainer.insertBefore(
-        gameHeader,
-        document.querySelector('.stage-indicator')
-    );
+
+    // Get the stage indicator element - make sure it exists first
+    const stageIndicator = document.querySelector('.stage-indicator');
+    if (!stageIndicator) {
+        console.error('Stage indicator not found!');
+        return;
+    }
+
+    gameContainer.insertBefore(gameHeader, stageIndicator);
 
     try {
-        // Use the global stageSequence
+        // Check if stageSequence exists and is valid
+        if (typeof stageSequence === 'undefined') {
+            // Try to get it from localStorage
+            const storedSequence = localStorage.getItem('stageSequence');
+            if (!storedSequence) {
+                throw new Error('Stage sequence not found in localStorage');
+            }
+            stageSequence = JSON.parse(storedSequence);
+        }
+
         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
             throw new Error('Invalid stage sequence');
         }
@@ -2564,7 +2257,10 @@ function initializeGame(selections) {
         console.log('Current stage sequence:', stageSequence);
 
         currentStage = stageSequence[0];
-        stageData[currentStage] = { shockApplied: false, shockAmount: 0 };
+        stageData[currentStage] = {
+            shockApplied: false,
+            shockAmount: 0
+        };
 
         // Apply selections if provided
         if (selections) {
@@ -2572,86 +2268,75 @@ function initializeGame(selections) {
         }
 
         updateInterface();
-        
-        // Start the timer for the first stage
         startTimer();
     } catch (error) {
-        console.error('Error initializing game:', error);
+        console.error('Error initializing game:', error.message);
         alert('Error initializing game! Returning to start page.');
         window.location.href = 'start.html';
     }
 }
-
+      
+      
 
 
 
 
 
 // Add window.onload event listener at the end of game.html
-window.addEventListener('load', function() {
-    // 1. Load all required data
-    const categorySelections = localStorage.getItem('categorySelections');
-    const selectedGroup = localStorage.getItem('selectedGroup');
-    const storedStageSequence = localStorage.getItem('stageSequence');
-    
-    // 2. Validate all required data exists
-    if (!categorySelections || !selectedGroup || !storedStageSequence) {
-        console.error('Missing required game data:', {
-            hasSelections: !!categorySelections,
-            hasGroup: !!selectedGroup,
-            hasSequence: !!storedStageSequence
-        });
-        alert('Missing game data. Returning to selection page.');
+window.addEventListener('load', function () {
+    const selections = localStorage.getItem('categorySelections');
+
+    if (!selections) {
+        // Redirect if no selections found
         window.location.href = 'selection.html';
         return;
     }
 
-    // 3. Parse and process selections
-    try {
-        const parsedSelections = JSON.parse(categorySelections);
-        stageSequence = JSON.parse(storedStageSequence);
-        
-        console.log('Game Initialization Data:', {
-            selections: parsedSelections,
-            group: selectedGroup,
-            sequence: stageSequence
-        });
+    const parsedSelections = JSON.parse(selections);
+    console.log("Loaded categorySelections:", parsedSelections);
 
-        // Update SPENDING_CATEGORIES with selections
-        Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
-            if (SPENDING_CATEGORIES[categoryKey]) {
-                SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
-                    const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
-                    return predefinedItem || { name, icon: "✨" };
-                });
-            } else {
-                console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
-            }
-        });
+    Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
+        if (SPENDING_CATEGORIES[categoryKey]) {
+            SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
+                const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
+                return predefinedItem || { name, icon: "✨" }; // Use default icon only for custom items
+            });
+        } else {
+            console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
+        }
+    });
 
-        console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
-        
-        // 4. Initialize game with verified data
-        initializeGame(parsedSelections);
-    } catch (error) {
-        console.error('Error parsing game data:', error);
-        alert('Error loading game data. Please try again.');
-        window.location.href = 'selection.html';
-    }
+    console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
+
+    // Initialize the game UI
+    updateInterface();
 });
-      
-      
+
+
+
 
 
 const SHOCK_EVENTS = [
-    { text: "Surprise! Your friend's birthday party is tomorrow. Time to buy a gift! 🎁", amount: 1500 },
-    { text: "PHCN has disconnected your electricity without notice. Emergency reconnection needed! ⚡", amount: 2000 },
-    { text: "Your phone screen cracked. Quick repair needed for work! 📱", amount: 1800 },
-    { text: "Unexpected transportation fare increase this week! 🚌", amount: 1200 },
-    { text: "Emergency medical consultation needed! 🏥", amount: 1700 },
-    { text: "Surprise family visit - need to stock up on groceries! 🛒", amount: 1300 },
-    { text: "Your favorite food vendor increased prices! 🍲", amount: 1100 },
-    { text: "Water supply issues - need to buy from water truck! 💧", amount: 1600 },
+    { text: "Surprise! Your friend's birthday party is tomorrow. Time to buy a gift! 🎁", amount: 15000 },
+    { text: "PHCN has disconnected your electricity without notice. Emergency reconnection needed! ⚡", amount: 20000 },
+    { text: "Your phone screen cracked. Quick repair needed for work! 📱", amount: 18000 },
+    { text: "Unexpected transportation fare increase this week! 🚌", amount: 12000 },
+    { text: "Emergency medical consultation needed! 🏥", amount: 17000 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
+    { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 },
+    { text: "Surprise family visit - need to stock up on groceries! 🛒", amount: 13000 },
+    { text: "Your favorite food vendor increased prices! 🍲", amount: 11000 },
+    { text: "Water supply issues - need to buy from water truck! 💧", amount: 16000 },
     { text: "Great news! No unexpected expenses this month. You're all set! 😊", amount: 0 },
     { text: "Nothing unusual happened this month. Enjoy your smooth sailing! 🚀", amount: 0 }
 ];
@@ -3203,66 +2888,37 @@ function getStageData(stageName) {
 // }
 
 
-
+      
+      
 function saveGameData(data, isPostShock = false) {
     return new Promise((resolve, reject) => {
         try {
+            // Create dataToSave object with the additional 'dataType' field
             const dataToSave = {
                 ...data,
-                is_post_shock: isPostShock,
-                timestamp: new Date().toISOString()
+                dataType: isPostShock ? "post-shock" : "pre-shock"
             };
 
-            // For development server on port 5500
-            if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
-                try {
-                    localStorage.setItem('gameData', JSON.stringify(dataToSave));
-                    console.log(`${isPostShock ? 'Post' : 'Pre'}-shock data saved locally:`, dataToSave);
-                    resolve({ status: 'success', message: 'Saved locally' });
-                } catch (storageError) {
-                    console.error('LocalStorage error:', storageError);
-                    reject(new Error('Failed to save to localStorage'));
-                }
-                return;
+            // If running locally, save the data in localStorage
+            if (window.location.hostname === 'localhost') {
+                localStorage.setItem('gameData', JSON.stringify(dataToSave));
+                console.log('Data saved locally:', dataToSave);
+                resolve({ status: 'success', message: 'Saved locally' });
+            } else {
+                // For non-localhost, send data via API request
+                const apiBaseUrl = getApiBaseUrl();
+                axios.post(`${apiBaseUrl}/api/save-game-data`, dataToSave) // Use backticks for template literals
+                    .then(response => resolve(response.data))
+                    .catch(error => reject(error));
             }
-
-            // For production environment
-            const apiBaseUrl = getApiBaseUrl();
-            fetch(`${apiBaseUrl}/api/save-game-data`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dataToSave)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(responseData => {
-                console.log(`${isPostShock ? 'Post' : 'Pre'}-shock data saved to server:`, responseData);
-                resolve(responseData);
-            })
-            .catch(error => {
-                console.error(`Failed to save ${isPostShock ? 'post' : 'pre'}-shock data:`, error);
-                // Attempt local backup if server save fails
-                try {
-                    localStorage.setItem('gameData_backup', JSON.stringify(dataToSave));
-                    console.warn('Server save failed. Data backed up locally.');
-                } catch (backupError) {
-                    console.error('Backup save failed:', backupError);
-                }
-                reject(error);
-            });
         } catch (error) {
-            console.error('Error in saveGameData:', error);
+            // Handle any unexpected errors
             reject(error);
         }
     });
 }
 
+      
 
 
     </script>
