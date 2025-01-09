@@ -369,12 +369,12 @@ const SALARY_PROGRESSION = {
     july: {
         // Now 1.5x based on March's total (N121,000)
         get regular() {
-            const marchTotal = SALARY_PROGRESSION.march.total;
+            const marchTotal = SALARY_PROGRESSION.march.regular;
             return Math.round(marchTotal * 1); // ~N181,500
         },
         // Bonus based on new total
         get bonus() {
-            const marchTotal = SALARY_PROGRESSION.march.total;
+            const marchTotal = SALARY_PROGRESSION.march.regular;
             return Math.round(marchTotal * 0.2); // ~N24,200
         },
         get total() { return this.regular + this.bonus; } // ~N205,700
@@ -396,7 +396,7 @@ const STAGES = {
         title: '',
         description: function() {
             const salary = SALARY_PROGRESSION.baseline.toLocaleString();
-            return `Can you remember you spending in November! Maybe you wanna think🌟 You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
+            return `Can you remember you spending in November 2024! Please try to think back🌟  You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const salary = SALARY_PROGRESSION.baseline;
@@ -423,11 +423,11 @@ You'll need to adjust your budget to handle this surprise expense. Remember, eve
             const total = SALARY_PROGRESSION.july.total;
             return `Bam, bam! Big win! 🎉
 
-Remember in November,  you were managing **${previousTotal.toLocaleString()} NGN** in total? Well, things just got better! Your earnings is still **${newRegular.toLocaleString()} NGN**, AND you've got a special **transport bonus of ${bonusAmount.toLocaleString()} NGN**! 
+Remember in November 2025,  you were managing **${newRegular.toLocaleString()} NGN** in total? Well, things just got better! Your earnings is still **${newRegular.toLocaleString()} NGN**, AND you've got a special **transport bonus of ${bonusAmount.toLocaleString()} NGN**! 
 
 That brings your total to **${total.toLocaleString()} NGN** for this month! 💰
 
-It's a **transportation bonus** just for you — a reward for all your hustle. Whether you decide to splurge on that special meal, clear bills, or stash it away for the rainy day, the choice is yours.
+It's a **transportation bonus** just for you — a reward for all your hustle. Whether you decide to splurge on transportation. The choice is yours!
 
 Enjoy the boost! 🤑`;
         },
@@ -461,7 +461,7 @@ Show us how you handle unexpected expenses with your upgraded earnings!`;
         title: '🏅 January 2025 - Transport Bonus',
         description: function() {
             const bonusAmount = SALARY_PROGRESSION.july.bonus;
-            return `Now, let's manage your special meal bonus of ${bonusAmount.toLocaleString()} NGN!`;
+            return `Now, let's manage your special transportation bonus of ${bonusAmount.toLocaleString()} NGN!`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const bonus = SALARY_PROGRESSION.july.bonus;
