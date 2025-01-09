@@ -132,28 +132,28 @@
                 <div class="allocation-grid">
                     <div class="category-section">
                         <div class="category-title">
-                            <i class="fas fa-utensils"></i> Daily Needs
+                            <i class="fas fa-utensils"></i> Category 1
                         </div>
                         <div id="essentials-grid" class="item-grid"></div>
                     </div>
                     
                     <div class="category-section">
                         <div class="category-title">
-                            <i class="fas fa-bus"></i> Transport
+                            <i class="fas fa-bus"></i> Category 2
                         </div>
                         <div id="transport-grid" class="item-grid"></div>
                     </div>
                     
                     <div class="category-section">
                         <div class="category-title">
-                            <i class="fas fa-smile"></i> Lifestyle
+                            <i class="fas fa-smile"></i> Category 3
                         </div>
                         <div id="lifestyle-grid" class="item-grid"></div>
                     </div>
                     
                     <div class="category-section">
                         <div class="category-title">
-                            <i class="fas fa-piggy-bank"></i> Savings
+                            <i class="fas fa-piggy-bank"></i> Category 4
                         </div>
                         <div id="savings-grid" class="item-grid"></div>
                     </div>
@@ -336,9 +336,10 @@ function updateScenarioAfterShock() {
 
 // Define base salaries for different levels
 const SALARY_LEVELS = {
-    'Senior': 1200000,
-    'Mid': 950000,
-    'Junior': 600000
+   'intern': 150000,
+    'low': 600000,
+    'mid': 950000,
+    'high': 12000000
 };
 
 // Function to get base salary from localStorage
@@ -395,7 +396,7 @@ const STAGES = {
         title: '📊 January 2025',
         description: function() {
             const salary = SALARY_PROGRESSION.baseline.toLocaleString();
-            return `Welcome to January, my guy! 🌟 You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
+            return `Welcome to January, my guy! 🌟 You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦${salary} to work with! 💪 💸`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const salary = SALARY_PROGRESSION.baseline;
