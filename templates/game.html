@@ -396,7 +396,7 @@ const STAGES = {
         title: '',
         description: function() {
             const salary = SALARY_PROGRESSION.baseline.toLocaleString();
-            return `Can you remember you spending in November 2024! Please try to think back🌟  You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
+            return `Can you STILL remember your spending in November 2024! Please try to think back🌟  You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const salary = SALARY_PROGRESSION.baseline;
@@ -461,7 +461,7 @@ Show us how you handle unexpected expenses with your upgraded earnings!`;
         title: '🏅 January 2025 - Transport Bonus',
         description: function() {
             const bonusAmount = SALARY_PROGRESSION.july.bonus;
-            return `Now, let's manage your special transportation bonus of ${bonusAmount.toLocaleString()} NGN!`;
+            return `Now, manage your special transportation bonus of ${bonusAmount.toLocaleString()} NGN!`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const bonus = SALARY_PROGRESSION.july.bonus;
@@ -479,10 +479,10 @@ Let's see how you handle this surprise with your bonus money! 💪`;
     },
 
     'condition_b1': {
-        title: '💰 Lump Sum Salary and Bonus',
+        title: '💰 February 2025',
         description: function() {
             const total = SALARY_PROGRESSION.july.total;
-            return `As part of your annual salary review, we're pleased to announce a one-time increase in your monthly salary to ₦${total.toLocaleString()}. This reflects your base salary plus a 10% increase, which has been incorporated into your regular paycheck. 🎉`;
+            return `Welcome to February. Your monthly salary stil remain at ₦${total.toLocaleString()}. Please reflect on how you want to spend it 🎉`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const total = SALARY_PROGRESSION.july.total;
