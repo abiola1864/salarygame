@@ -645,7 +645,7 @@ function updateScenarioAfterShock() {
 
 
 
- let currentStage = '';
+ let currentStage = null;
 let totalAmount = 0;
 let totalEarnings = 0;
 const stageData = {};
@@ -2178,104 +2178,87 @@ newSubmitButton.addEventListener('click', function (e) {
 let stageSequence = [];
 
 // Modified event listener to set global stageSequence
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        const savedStageSequence = localStorage.getItem('stageSequence');
-        if (!savedStageSequence) {
-            console.warn('stageSequence missing in localStorage');
-            alert('Required game data missing! Redirecting to the start page.');
-            window.location.href = 'start.html';
-            return;
-        }
+// document.addEventListener('DOMContentLoaded', function() {
+//     try {
+//         const savedStageSequence = localStorage.getItem('stageSequence');
+//         if (!savedStageSequence) {
+//             console.warn('stageSequence missing in localStorage');
+//             alert('Required game data missing! Redirecting to the start page.');
+//             window.location.href = 'start.html';
+//             return;
+//         }
 
-        // Parse and validate stageSequence
-        stageSequence = JSON.parse(savedStageSequence);
-        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
-            console.error('Invalid stage sequence:', stageSequence);
-            throw new Error('Invalid stage sequence format');
-        }
+//         // Parse and validate stageSequence
+//         stageSequence = JSON.parse(savedStageSequence);
+//         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+//             console.error('Invalid stage sequence:', stageSequence);
+//             throw new Error('Invalid stage sequence format');
+//         }
 
-        // Proceed with game initialization
-        initializeGame();
-    } catch (error) {
-        console.error('Error loading stage sequence:', error.message);
-        alert('Error loading game data! Redirecting to start page.');
-        window.location.href = 'start.html';
-    }
-});
+//         // Proceed with game initialization
+//         initializeGame();
+//     } catch (error) {
+//         console.error('Error loading stage sequence:', error.message);
+//         alert('Error loading game data! Redirecting to start page.');
+//         window.location.href = 'start.html';
+//     }
+// });
 
       
   
-      
-      
-function initializeGame(selections) {
-    totalEarnings = 0;
-
-    // Create game header
-    const gameHeader = document.createElement('div');
-    gameHeader.className = 'game-header';
-    gameHeader.innerHTML = `
-        <div class="earnings-display">
-            Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
-        </div>
-        <div class="timer">
-            Time Remaining: <span id="timer">3:00</span>
-        </div>
-    `;
-
-    const gameContainer = document.querySelector('.game-container');
-    if (!gameContainer) {
-        console.error('Game container not found!');
-        return;
-    }
-
-    // Get the stage indicator element - make sure it exists first
-    const stageIndicator = document.querySelector('.stage-indicator');
-    if (!stageIndicator) {
-        console.error('Stage indicator not found!');
-        return;
-    }
-
-    gameContainer.insertBefore(gameHeader, stageIndicator);
-
+  function initializeGame() {
     try {
-        // Check if stageSequence exists and is valid
-        if (typeof stageSequence === 'undefined') {
-            // Try to get it from localStorage
-            const storedSequence = localStorage.getItem('stageSequence');
-            if (!storedSequence) {
-                throw new Error('Stage sequence not found in localStorage');
-            }
-            stageSequence = JSON.parse(storedSequence);
+        // Initialize game state
+        totalEarnings = 0;
+        
+        // Create game header
+        const gameHeader = document.createElement('div');
+        gameHeader.className = 'game-header';
+        gameHeader.innerHTML = `
+            <div class="earnings-display">
+                Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
+            </div>
+            <div class="timer">
+                Time Remaining: <span id="timer">3:00</span>
+            </div>
+        `;
+
+        const gameContainer = document.querySelector('.game-container');
+        const stageIndicator = document.querySelector('.stage-indicator');
+
+        if (!gameContainer || !stageIndicator) {
+            throw new Error('Required game elements not found');
         }
 
-        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
-            throw new Error('Invalid stage sequence');
-        }
+        gameContainer.insertBefore(gameHeader, stageIndicator);
 
-        // Log the stage sequence to verify its correctness
-        console.log('Current stage sequence:', stageSequence);
-
+        // Set up current stage
+        const stageSequence = JSON.parse(localStorage.getItem('stageSequence'));
         currentStage = stageSequence[0];
         stageData[currentStage] = {
             shockApplied: false,
             shockAmount: 0
         };
 
-        // Apply selections if provided
-        if (selections) {
-            applySelections(selections);
-        }
-
+        // Update UI and start timer
         updateInterface();
         startTimer();
+
     } catch (error) {
-        console.error('Error initializing game:', error.message);
-        alert('Error initializing game! Returning to start page.');
-        window.location.href = 'start.html';
+        console.error('Error in initializeGame:', error);
+        // Display error on page instead of redirecting
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            background: #ffebee;
+            padding: 15px;
+            margin: 10px;
+            border: 1px solid #ef9a9a;
+            border-radius: 4px;
+        `;
+        errorDiv.innerHTML = `<strong>Error initializing game:</strong> ${error.message}`;
+        document.body.insertBefore(errorDiv, document.body.firstChild);
     }
 }
-      
       
 
 
@@ -2283,36 +2266,111 @@ function initializeGame(selections) {
 
 
 // Add window.onload event listener at the end of game.html
-window.addEventListener('load', function () {
-    const selections = localStorage.getItem('categorySelections');
+window.addEventListener('load', function() {
+    console.log("=== Starting Game Initialization ===");
+    
+    try {
+        // Log all localStorage contents
+        console.log("LocalStorage contents:", {
+            categorySelections: localStorage.getItem('categorySelections'),
+            stageSequence: localStorage.getItem('stageSequence'),
+            selectedGroup: localStorage.getItem('selectedGroup'),
+            userInfo: localStorage.getItem('userInfo')
+        });
 
-    if (!selections) {
-        // Redirect if no selections found
-        window.location.href = 'selection.html';
-        return;
-    }
+        const selections = localStorage.getItem('categorySelections');
+        const stageSequence = localStorage.getItem('stageSequence');
+        const selectedGroup = localStorage.getItem('selectedGroup');
+        const userInfo = localStorage.getItem('userInfo');
 
-    const parsedSelections = JSON.parse(selections);
-    console.log("Loaded categorySelections:", parsedSelections);
+        console.log("Checking required data:");
+        console.log("- selections:", !!selections);
+        console.log("- stageSequence:", !!stageSequence);
+        console.log("- selectedGroup:", !!selectedGroup);
+        console.log("- userInfo:", !!userInfo);
 
-    Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
-        if (SPENDING_CATEGORIES[categoryKey]) {
-            SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
-                const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
-                return predefinedItem || { name, icon: "✨" }; // Use default icon only for custom items
-            });
-        } else {
-            console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
+        if (!selections || !stageSequence || !selectedGroup || !userInfo) {
+            const error = new Error('Missing required game data');
+            error.details = {
+                hasSelections: !!selections,
+                hasStageSequence: !!stageSequence,
+                hasSelectedGroup: !!selectedGroup,
+                hasUserInfo: !!userInfo
+            };
+            throw error;
         }
-    });
 
-    console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
+        // Parse and validate stage sequence
+        const parsedStageSequence = JSON.parse(stageSequence);
+        console.log("Parsed stage sequence:", parsedStageSequence);
 
-    // Initialize the game UI
-    updateInterface();
+        if (!Array.isArray(parsedStageSequence) || parsedStageSequence.length === 0) {
+            throw new Error('Invalid stage sequence format');
+        }
+
+        // Set global stageSequence
+        window.stageSequence = parsedStageSequence;
+
+        // Parse selections
+        const parsedSelections = JSON.parse(selections);
+        console.log("Parsed selections:", parsedSelections);
+
+        console.log("=== Starting SPENDING_CATEGORIES update ===");
+        Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
+            console.log(`Processing category: ${categoryKey}`);
+            if (SPENDING_CATEGORIES[categoryKey]) {
+                SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
+                    const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
+                    return predefinedItem || { name, icon: "✨" };
+                });
+            } else {
+                console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
+            }
+        });
+
+        console.log("=== Calling initializeGame ===");
+        initializeGame();
+
+    } catch (error) {
+        // Instead of redirecting, display the error
+        console.error('Game initialization failed:', {
+            message: error.message,
+            details: error.details,
+            stack: error.stack
+        });
+        
+        // Create an error display on the page
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border: 2px solid red;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            max-width: 80%;
+            z-index: 1000;
+        `;
+        
+        errorDiv.innerHTML = `
+            <h2 style="color: red; margin-bottom: 10px;">Game Initialization Error</h2>
+            <p><strong>Error:</strong> ${error.message}</p>
+            ${error.details ? `<pre style="background: #f5f5f5; padding: 10px; margin-top: 10px;">Details: ${JSON.stringify(error.details, null, 2)}</pre>` : ''}
+            <div style="margin-top: 15px;">
+                <button onclick="window.location.href='start.html'" style="padding: 8px 16px; margin-right: 10px;">Return to Start</button>
+                <button onclick="window.location.href='selection.html'" style="padding: 8px 16px;">Return to Selection</button>
+            </div>
+        `;
+        
+        document.body.appendChild(errorDiv);
+    }
 });
-
-
+      
+      
+      
 
 
 

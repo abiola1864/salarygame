@@ -87,35 +87,58 @@
             }
         };
 
-       document.getElementById('startButton').addEventListener('click', async () => {
+      
+      
+  document.getElementById('startButton').addEventListener('click', async () => {
+    console.log("=== Start Button Clicked ===");
+    
     const startButton = document.getElementById('startButton');
     const groupMessage = document.getElementById('groupMessage');
     const loading = document.getElementById('loading');
 
     try {
-        // Log initial state
-        console.log('Initial localStorage:', {
+        // Log existing data
+        console.log("Existing localStorage data:", {
             categorySelections: localStorage.getItem('categorySelections'),
-            stageSequence: localStorage.getItem('stageSequence'),
-            selectedGroup: localStorage.getItem('selectedGroup')
+            userInfo: localStorage.getItem('userInfo')
         });
+
+        // Verify we have the required data
+        const selections = localStorage.getItem('categorySelections');
+        const userInfo = localStorage.getItem('userInfo');
         
+        if (!selections || !userInfo) {
+            throw new Error('Missing required game data. Please complete the selection process.');
+        }
+
         startButton.disabled = true;
         const group = Math.random() < 0.5 ? 1 : 2;
         
         // Store group and stage sequence
-        localStorage.setItem('selectedGroup', group);
+        localStorage.setItem('selectedGroup', group.toString());
         localStorage.setItem('stageSequence', JSON.stringify(gameConfig.groups[group]));
         
-        // Log after storing new data
-        console.log('After storing game data:', {
-            categorySelections: localStorage.getItem('categorySelections'),
-            stageSequence: localStorage.getItem('stageSequence'),
-            selectedGroup: localStorage.getItem('selectedGroup')
+        // Log all stored data
+        console.log("=== Data stored in localStorage ===", {
+            selections: JSON.parse(selections),
+            userInfo: JSON.parse(userInfo),
+            group: group,
+            stageSequence: gameConfig.groups[group]
         });
 
         groupMessage.textContent = `You have been assigned to Group ${group}. Starting the game...`;
         loading.classList.add('visible');
+
+        // Add delay to ensure data is saved
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Verify data was saved
+        console.log("=== Verifying stored data ===", {
+            categorySelections: localStorage.getItem('categorySelections'),
+            stageSequence: localStorage.getItem('stageSequence'),
+            selectedGroup: localStorage.getItem('selectedGroup'),
+            userInfo: localStorage.getItem('userInfo')
+        });
 
         setTimeout(() => {
             window.location.href = 'game.html';
@@ -123,12 +146,16 @@
 
     } catch (error) {
         console.error('Error starting game:', error);
-        groupMessage.textContent = 'Error starting game. Please try again.';
+        groupMessage.textContent = error.message;
         startButton.disabled = false;
         loading.classList.remove('visible');
     }
 });
-
+      
+      
+      
+      
+      
 // Remove this window.onload handler if it exists, as it's clearing needed data
 // window.addEventListener('load', () => {
 //     localStorage.removeItem('selectedGroup');

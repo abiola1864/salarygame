@@ -796,21 +796,29 @@ function initializeSelections() {
 }
 
 function saveSelectionsToLocalStorage() {
-    const categorySelections = {};
-
-    // Gather selections for all categories
-    Object.entries(SPENDING_CATEGORIES).forEach(([categoryKey, category]) => {
-        const selectedItems = category.items.filter(item =>
-            selections[categoryKey]?.includes(item.name)
-        );
-        categorySelections[categoryKey] = selectedItems; // Store selected items
+    // Get all the selected items for each category
+    const selectedItems = {};
+    Object.keys(selections).forEach(category => {
+        selectedItems[category] = selections[category];
     });
+    
+    // Also save any user info
+    const userInfo = {
+        age: document.getElementById('age').value,
+        gender: document.getElementById('gender').value,
+        level: document.getElementById('level').value
+    };
 
-    // Save consolidated selections to localStorage
-    localStorage.setItem('categorySelections', JSON.stringify(categorySelections));
+    // Save both selections and user info
+    localStorage.setItem('categorySelections', JSON.stringify(selectedItems));
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+    
+    // Log to verify data is saved
+    console.log('Saved selections:', selectedItems);
+    console.log('Saved user info:', userInfo);
 }
-
-
+      
+      
 
 
 
