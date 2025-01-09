@@ -499,42 +499,11 @@ Can you still manage with less? Show us how you handle unexpected expenses with 
         framing: 'lumpsum'
     },
 
-    'condition_c': {
-        title: '💰 Salary Increase Stage',
-        description: function() {
-            const previousTotal = SALARY_PROGRESSION.july.total;
-            const newTotal = SALARY_PROGRESSION.final.amount;
-            const increase = newTotal - previousTotal;
-            return `Hold on tight! 🎉
 
-Your financial journey has been amazing! From managing **${previousTotal.toLocaleString()} NGN** last time, you're now stepping up to **${newTotal.toLocaleString()} NGN**! That's an extra **${increase.toLocaleString()} NGN** to work with!
-
-This isn't just a new salary — it's a reward for mastering your money management skills through all the ups and downs. You've learned to handle regular salaries, additional payments, bonuses, and even surprise expenses! 💪
-
-No more counting pennies or stretching the budget — you're officially living the good life! 💃
-
-Time to show off those premium money management skills and celebrate your **hard work** paying off. 😎
-
-Enjoy the boost, because you absolutely deserve it! 💸`;
-        },
-        getPostShockDescription: (shockEvent, shockAmount) => {
-            const total = SALARY_PROGRESSION.final.amount;
-            return `Even big money needs careful management! 😅 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} you didn't plan for!
-
-Your impressive ${total.toLocaleString()} NGN is now ${(total - shockAmount).toLocaleString()} NGN. Still substantial, but requires some tweaking!
-
-Show us how you handle unexpected expenses with this upgraded lifestyle! 🎩`;
-        },
-        get base_salary() { return SALARY_PROGRESSION.final.amount; },
-        get shock_range() {
-            return [Math.round(this.base_salary * 0.1), Math.round(this.base_salary * 0.15)];
-        },
-        framing: 'salary-increase'
-    },
 
     'congratulations': {
         title: '🎉 Congratulations!',
-        description: `You've successfully completed all the stages of the Life Choices Game! 🏆
+        description: `You've successfully completed all the stages of the Salary Allocation  Game! 🏆
 
 Well done!`,
         base_salary: 0,
