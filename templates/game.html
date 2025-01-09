@@ -13,17 +13,16 @@
     <div class="game-container">
       <div class="stage-indicator">
     <!-- Group 1 (Lump Sum) stages -->
-    <div class="stage-dot" data-stage="baseline"></div>
-    <div class="stage-dot" data-stage="description_page_lump_sum"></div>
-    <div class="stage-dot" data-stage="november_lump"></div>
+<div class="stage-dot" data-stage="baseline_lumpsum"></div>
+<div class="stage-dot" data-stage="description_page_lump_sum"></div>
+<div class="stage-dot" data-stage="november_lump"></div>
 
+<div class="stage-dot" data-stage="baseline_segregated"></div>
+<div class="stage-dot" data-stage="description_page_segregated"></div>
+<div class="stage-dot" data-stage="november_segregated"></div>
+<div class="stage-dot" data-stage="january"></div>
+<div class="stage-dot" data-stage="congratulations"></div>
 
-    <!-- Group 2 (Segregated) stages -->
-    <div class="stage-dot" data-stage="baseline"></div>
-    <div class="stage-dot" data-stage="description_page_segregated"></div>
-    <div class="stage-dot" data-stage="november_segregated"></div>
-    <div class="stage-dot" data-stage="january"></div>
-    <div class="stage-dot" data-stage="congratulations"></div>
 </div>
       
         <div id="scenario" class="scenario">
@@ -1224,35 +1223,34 @@ let preShockCategorySum = 0; // Variable to track the initial category sum befor
 // }
 
 
-function proceedToNextStage() {
-    // Stop the current timer
-    clearInterval(timerInterval);
 
-    const categorySum = calculateCategoryEarnings(); // Calculate category earnings
-    const speedBonus = timeRemaining > 0 ? 500 : 0; // Apply speed bonus if applicable
+ function proceedToNextStage() {
+    try {
+        // Retrieve the stage sequence from the DOM (grouped properly)
+        const stageDots = document.querySelectorAll('.stage-dot');
+        const storedSequence = Array.from(stageDots).map(dot => dot.dataset.stage);
 
-    // Display earnings breakdown
-    showEarningsBreakdown(categorySum, speedBonus);
+        // Ensure currentStage is synchronized
+        const currentIndex = storedSequence.indexOf(currentStage);
+        if (currentIndex === -1) {
+            console.error('Current stage not found in the stored sequence.');
+            return;
+        }
 
-    // Transition to the next stage
-    const stageSequence = Object.keys(STAGES);
-    const currentIndex = stageSequence.indexOf(currentStage);
-
-    if (currentIndex < stageSequence.length - 1) {
-        currentStage = stageSequence[currentIndex + 1];
-       
-        updateInterface();
-
-        // Restart the timer for the new stage
-        startTimer();
-    } else {
-        // End of game logic
-        document.getElementById('game-complete').style.display = 'block';
-        alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
+        // Move to the next stage if not at the end
+        if (currentIndex < storedSequence.length - 1) {
+            currentStage = storedSequence[currentIndex + 1];
+            localStorage.setItem('currentStage', currentStage);
+            updateInterface();
+        } else {
+            document.getElementById('game-complete').style.display = 'block';
+            alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
+        }
+    } catch (error) {
+        console.error('Error in proceedToNextStage:', error);
+        alert('An error occurred while proceeding to the next stage. Please refresh the page or contact support.');
     }
 }
-
-
 
 
 
