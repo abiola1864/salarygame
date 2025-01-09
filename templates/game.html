@@ -2204,25 +2204,24 @@ let stageSequence = [];
 //     }
 // });
 
-      
-  
-  function initializeGame() {
+ function initializeGame() {
     try {
         // Initialize game state
-        totalEarnings = 0;
+        let totalEarnings = 0;
         
         // Create game header
         const gameHeader = document.createElement('div');
         gameHeader.className = 'game-header';
         gameHeader.innerHTML = `
             <div class="earnings-display">
-                Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
+                Total Earnings: <span id="totalEarnings">₦${totalEarnings.toLocaleString()}</span>
             </div>
             <div class="timer">
                 Time Remaining: <span id="timer">3:00</span>
             </div>
         `;
 
+        // Get required elements
         const gameContainer = document.querySelector('.game-container');
         const stageIndicator = document.querySelector('.stage-indicator');
 
@@ -2230,23 +2229,113 @@ let stageSequence = [];
             throw new Error('Required game elements not found');
         }
 
-        gameContainer.insertBefore(gameHeader, stageIndicator);
-
-        // Set up current stage
+        // Get and validate stage sequence
         const stageSequence = JSON.parse(localStorage.getItem('stageSequence'));
-        currentStage = stageSequence[0];
-        stageData[currentStage] = {
-            shockApplied: false,
-            shockAmount: 0
+        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+            throw new Error('Invalid stage sequence');
+        }
+
+        // Validate current stage exists in STAGES
+        const currentStage = stageSequence[0];
+        if (!STAGES[currentStage]) {
+            throw new Error(`Invalid stage: ${currentStage}`);
+        }
+
+        // Initialize stage data
+        window.stageData = {
+            [currentStage]: {
+                shockApplied: false,
+                shockAmount: 0,
+                salary: STAGES[currentStage].base_salary
+            }
         };
 
-        // Update UI and start timer
-        updateInterface();
+        // Insert game header
+        gameContainer.insertBefore(gameHeader, stageIndicator);
+
+        // Update stage indicator
+        stageIndicator.textContent = STAGES[currentStage].title;
+
+        // Add stage description
+        const descriptionDiv = document.createElement('div');
+        descriptionDiv.className = 'stage-description';
+        descriptionDiv.innerHTML = STAGES[currentStage].description();
+        gameContainer.appendChild(descriptionDiv);
+
+        // Start timer
         startTimer();
 
     } catch (error) {
         console.error('Error in initializeGame:', error);
-        // Display error on page instead of redirecting
+        displayError(error);
+    }
+}
+
+// Helper function to display errors
+function displayError(error) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border: 2px solid red;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        max-width: 80%;
+        z-index: 1000;
+    `;
+    
+    errorDiv.innerHTML = `
+        <h2 style="color: red; margin-bottom: 10px;">Game Initialization Error</h2>
+        <p><strong>Error:</strong> ${error.message}</p>
+        <div style="background: #f5f5f5; padding: 10px; margin: 10px 0;">
+            <strong>Debug Info:</strong><br>
+            Stage Sequence: ${localStorage.getItem('stageSequence') || 'Not found'}<br>
+            Categories: ${localStorage.getItem('categorySelections') || 'Not found'}<br>
+            User Info: ${localStorage.getItem('userInfo') || 'Not found'}
+        </div>
+        <div style="margin-top: 15px;">
+            <button onclick="window.location.href='selection.html'" style="padding: 8px 16px; margin-right: 10px;">Return to Selection</button>
+            <button onclick="window.location.reload()" style="padding: 8px 16px;">Retry</button>
+        </div>
+    `;
+    
+    document.body.appendChild(errorDiv);
+}
+
+      
+      
+// Add window onload handler
+window.addEventListener('load', function() {
+    console.log("=== Starting Game Initialization ===");
+    
+    try {
+        // Log localStorage contents for debugging
+        console.log("LocalStorage contents:", {
+            categorySelections: localStorage.getItem('categorySelections'),
+            stageSequence: localStorage.getItem('stageSequence'),
+            selectedGroup: localStorage.getItem('selectedGroup'),
+            userInfo: localStorage.getItem('userInfo')
+        });
+
+        // Validate required data presence
+        const requiredData = ['categorySelections', 'stageSequence', 'selectedGroup', 'userInfo'];
+        const missingData = requiredData.filter(key => !localStorage.getItem(key));
+        
+        if (missingData.length > 0) {
+            throw new Error(`Missing required data: ${missingData.join(', ')}`);
+        }
+
+        // Initialize game if all data is present
+        initializeGame();
+
+    } catch (error) {
+        console.error('Game initialization failed:', error);
+        
+        // Display user-friendly error
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = `
             background: #ffebee;
@@ -2255,123 +2344,17 @@ let stageSequence = [];
             border: 1px solid #ef9a9a;
             border-radius: 4px;
         `;
-        errorDiv.innerHTML = `<strong>Error initializing game:</strong> ${error.message}`;
+        errorDiv.innerHTML = `
+            <strong>Error starting game:</strong> ${error.message}<br>
+            <button onclick="window.location.href='selection.html'" style="margin-top: 10px; padding: 5px 10px;">
+                Return to Selection
+            </button>
+        `;
         document.body.insertBefore(errorDiv, document.body.firstChild);
     }
-}
-      
-
-
-
-
-
-// Add window.onload event listener at the end of game.html
-window.addEventListener('load', function() {
-    console.log("=== Starting Game Initialization ===");
-    
-    try {
-        // Log all localStorage contents
-        console.log("LocalStorage contents:", {
-            categorySelections: localStorage.getItem('categorySelections'),
-            stageSequence: localStorage.getItem('stageSequence'),
-            selectedGroup: localStorage.getItem('selectedGroup'),
-            userInfo: localStorage.getItem('userInfo')
-        });
-
-        const selections = localStorage.getItem('categorySelections');
-        const stageSequence = localStorage.getItem('stageSequence');
-        const selectedGroup = localStorage.getItem('selectedGroup');
-        const userInfo = localStorage.getItem('userInfo');
-
-        console.log("Checking required data:");
-        console.log("- selections:", !!selections);
-        console.log("- stageSequence:", !!stageSequence);
-        console.log("- selectedGroup:", !!selectedGroup);
-        console.log("- userInfo:", !!userInfo);
-
-        if (!selections || !stageSequence || !selectedGroup || !userInfo) {
-            const error = new Error('Missing required game data');
-            error.details = {
-                hasSelections: !!selections,
-                hasStageSequence: !!stageSequence,
-                hasSelectedGroup: !!selectedGroup,
-                hasUserInfo: !!userInfo
-            };
-            throw error;
-        }
-
-        // Parse and validate stage sequence
-        const parsedStageSequence = JSON.parse(stageSequence);
-        console.log("Parsed stage sequence:", parsedStageSequence);
-
-        if (!Array.isArray(parsedStageSequence) || parsedStageSequence.length === 0) {
-            throw new Error('Invalid stage sequence format');
-        }
-
-        // Set global stageSequence
-        window.stageSequence = parsedStageSequence;
-
-        // Parse selections
-        const parsedSelections = JSON.parse(selections);
-        console.log("Parsed selections:", parsedSelections);
-
-        console.log("=== Starting SPENDING_CATEGORIES update ===");
-        Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
-            console.log(`Processing category: ${categoryKey}`);
-            if (SPENDING_CATEGORIES[categoryKey]) {
-                SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
-                    const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
-                    return predefinedItem || { name, icon: "✨" };
-                });
-            } else {
-                console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
-            }
-        });
-
-        console.log("=== Calling initializeGame ===");
-        initializeGame();
-
-    } catch (error) {
-        // Instead of redirecting, display the error
-        console.error('Game initialization failed:', {
-            message: error.message,
-            details: error.details,
-            stack: error.stack
-        });
-        
-        // Create an error display on the page
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 20px;
-            border: 2px solid red;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            max-width: 80%;
-            z-index: 1000;
-        `;
-        
-        errorDiv.innerHTML = `
-            <h2 style="color: red; margin-bottom: 10px;">Game Initialization Error</h2>
-            <p><strong>Error:</strong> ${error.message}</p>
-            ${error.details ? `<pre style="background: #f5f5f5; padding: 10px; margin-top: 10px;">Details: ${JSON.stringify(error.details, null, 2)}</pre>` : ''}
-            <div style="margin-top: 15px;">
-                <button onclick="window.location.href='start.html'" style="padding: 8px 16px; margin-right: 10px;">Return to Start</button>
-                <button onclick="window.location.href='selection.html'" style="padding: 8px 16px;">Return to Selection</button>
-            </div>
-        `;
-        
-        document.body.appendChild(errorDiv);
-    }
 });
-      
-      
-      
 
+      
 
 
 const SHOCK_EVENTS = [
