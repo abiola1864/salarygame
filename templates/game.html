@@ -645,7 +645,7 @@ function updateScenarioAfterShock() {
 
 
 
- let currentStage = null;
+ let currentStage = '';
 let totalAmount = 0;
 let totalEarnings = 0;
 const stageData = {};
@@ -654,7 +654,6 @@ let timeRemaining = 180; // 3 minutes in seconds
 
 let selectedEvents = [];
 let shockAmount = 0;
-
 
 function startTimer() {
     timeRemaining = 180;
@@ -2178,183 +2177,142 @@ newSubmitButton.addEventListener('click', function (e) {
 let stageSequence = [];
 
 // Modified event listener to set global stageSequence
-// document.addEventListener('DOMContentLoaded', function() {
-//     try {
-//         const savedStageSequence = localStorage.getItem('stageSequence');
-//         if (!savedStageSequence) {
-//             console.warn('stageSequence missing in localStorage');
-//             alert('Required game data missing! Redirecting to the start page.');
-//             window.location.href = 'start.html';
-//             return;
-//         }
-
-//         // Parse and validate stageSequence
-//         stageSequence = JSON.parse(savedStageSequence);
-//         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
-//             console.error('Invalid stage sequence:', stageSequence);
-//             throw new Error('Invalid stage sequence format');
-//         }
-
-//         // Proceed with game initialization
-//         initializeGame();
-//     } catch (error) {
-//         console.error('Error loading stage sequence:', error.message);
-//         alert('Error loading game data! Redirecting to start page.');
-//         window.location.href = 'start.html';
-//     }
-// });
-
- function initializeGame() {
+document.addEventListener('DOMContentLoaded', function() {
     try {
-        // Initialize game state
-        let totalEarnings = 0;
-        
-        // Create game header
-        const gameHeader = document.createElement('div');
-        gameHeader.className = 'game-header';
-        gameHeader.innerHTML = `
-            <div class="earnings-display">
-                Total Earnings: <span id="totalEarnings">₦${totalEarnings.toLocaleString()}</span>
-            </div>
-            <div class="timer">
-                Time Remaining: <span id="timer">3:00</span>
-            </div>
-        `;
-
-        // Get required elements
-        const gameContainer = document.querySelector('.game-container');
-        const stageIndicator = document.querySelector('.stage-indicator');
-
-        if (!gameContainer || !stageIndicator) {
-            throw new Error('Required game elements not found');
+        const savedStageSequence = localStorage.getItem('stageSequence');
+        if (!savedStageSequence) {
+            console.warn('stageSequence missing in localStorage');
+            alert('Required game data missing! Redirecting to the start page.');
+            window.location.href = 'start.html';
+            return;
         }
 
-        // Get and validate stage sequence
-        const stageSequence = JSON.parse(localStorage.getItem('stageSequence'));
+        // Parse and validate stageSequence
+        stageSequence = JSON.parse(savedStageSequence);
         if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
-            throw new Error('Invalid stage sequence');
+            console.error('Invalid stage sequence:', stageSequence);
+            throw new Error('Invalid stage sequence format');
         }
 
-        // Validate current stage exists in STAGES
-        const currentStage = stageSequence[0];
-        if (!STAGES[currentStage]) {
-            throw new Error(`Invalid stage: ${currentStage}`);
-        }
-
-        // Initialize stage data
-        window.stageData = {
-            [currentStage]: {
-                shockApplied: false,
-                shockAmount: 0,
-                salary: STAGES[currentStage].base_salary
-            }
-        };
-
-        // Insert game header
-        gameContainer.insertBefore(gameHeader, stageIndicator);
-
-        // Update stage indicator
-        stageIndicator.textContent = STAGES[currentStage].title;
-
-        // Add stage description
-        const descriptionDiv = document.createElement('div');
-        descriptionDiv.className = 'stage-description';
-        descriptionDiv.innerHTML = STAGES[currentStage].description();
-        gameContainer.appendChild(descriptionDiv);
-
-        // Start timer
-        startTimer();
-
-    } catch (error) {
-        console.error('Error in initializeGame:', error);
-        displayError(error);
-    }
-}
-
-// Helper function to display errors
-function displayError(error) {
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border: 2px solid red;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        max-width: 80%;
-        z-index: 1000;
-    `;
-    
-    errorDiv.innerHTML = `
-        <h2 style="color: red; margin-bottom: 10px;">Game Initialization Error</h2>
-        <p><strong>Error:</strong> ${error.message}</p>
-        <div style="background: #f5f5f5; padding: 10px; margin: 10px 0;">
-            <strong>Debug Info:</strong><br>
-            Stage Sequence: ${localStorage.getItem('stageSequence') || 'Not found'}<br>
-            Categories: ${localStorage.getItem('categorySelections') || 'Not found'}<br>
-            User Info: ${localStorage.getItem('userInfo') || 'Not found'}
-        </div>
-        <div style="margin-top: 15px;">
-            <button onclick="window.location.href='selection.html'" style="padding: 8px 16px; margin-right: 10px;">Return to Selection</button>
-            <button onclick="window.location.reload()" style="padding: 8px 16px;">Retry</button>
-        </div>
-    `;
-    
-    document.body.appendChild(errorDiv);
-}
-
-      
-      
-// Add window onload handler
-window.addEventListener('load', function() {
-    console.log("=== Starting Game Initialization ===");
-    
-    try {
-        // Log localStorage contents for debugging
-        console.log("LocalStorage contents:", {
-            categorySelections: localStorage.getItem('categorySelections'),
-            stageSequence: localStorage.getItem('stageSequence'),
-            selectedGroup: localStorage.getItem('selectedGroup'),
-            userInfo: localStorage.getItem('userInfo')
-        });
-
-        // Validate required data presence
-        const requiredData = ['categorySelections', 'stageSequence', 'selectedGroup', 'userInfo'];
-        const missingData = requiredData.filter(key => !localStorage.getItem(key));
-        
-        if (missingData.length > 0) {
-            throw new Error(`Missing required data: ${missingData.join(', ')}`);
-        }
-
-        // Initialize game if all data is present
+        // Proceed with game initialization
         initializeGame();
-
     } catch (error) {
-        console.error('Game initialization failed:', error);
-        
-        // Display user-friendly error
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-            background: #ffebee;
-            padding: 15px;
-            margin: 10px;
-            border: 1px solid #ef9a9a;
-            border-radius: 4px;
-        `;
-        errorDiv.innerHTML = `
-            <strong>Error starting game:</strong> ${error.message}<br>
-            <button onclick="window.location.href='selection.html'" style="margin-top: 10px; padding: 5px 10px;">
-                Return to Selection
-            </button>
-        `;
-        document.body.insertBefore(errorDiv, document.body.firstChild);
+        console.error('Error loading stage sequence:', error.message);
+        alert('Error loading game data! Redirecting to start page.');
+        window.location.href = 'start.html';
     }
 });
 
       
+  
+      
+      
+      function initializeGame(selections) {
+    totalEarnings = 0;
+
+    // Create game header
+    const gameHeader = document.createElement('div');
+    gameHeader.className = 'game-header';
+    gameHeader.innerHTML = `
+        <div class="earnings-display">
+            Total Earnings: <span id="totalEarnings">₦${totalEarnings}</span>
+        </div>
+        <div class="timer">
+            Time Remaining: <span id="timer">3:00</span>
+        </div>
+    `;
+
+    const gameContainer = document.querySelector('.game-container');
+    if (!gameContainer) {
+        console.error('Game container not found!');
+        return;
+    }
+
+    // Get the stage indicator element - make sure it exists first
+    const stageIndicator = document.querySelector('.stage-indicator');
+    if (!stageIndicator) {
+        console.error('Stage indicator not found!');
+        return;
+    }
+
+    gameContainer.insertBefore(gameHeader, stageIndicator);
+
+    try {
+        // Check if stageSequence exists and is valid
+        if (typeof stageSequence === 'undefined') {
+            // Try to get it from localStorage
+            const storedSequence = localStorage.getItem('stageSequence');
+            if (!storedSequence) {
+                throw new Error('Stage sequence not found in localStorage');
+            }
+            stageSequence = JSON.parse(storedSequence);
+        }
+
+        if (!Array.isArray(stageSequence) || stageSequence.length === 0) {
+            throw new Error('Invalid stage sequence');
+        }
+
+        // Log the stage sequence to verify its correctness
+        console.log('Current stage sequence:', stageSequence);
+
+        currentStage = stageSequence[0];
+        stageData[currentStage] = {
+            shockApplied: false,
+            shockAmount: 0
+        };
+
+        // Apply selections if provided
+        if (selections) {
+            applySelections(selections);
+        }
+
+        updateInterface();
+        startTimer();
+    } catch (error) {
+        console.error('Error initializing game:', error.message);
+        alert('Error initializing game! Returning to start page.');
+        window.location.href = 'start.html';
+    }
+}
+      
+      
+
+
+
+
+
+// Add window.onload event listener at the end of game.html
+window.addEventListener('load', function () {
+    const selections = localStorage.getItem('categorySelections');
+
+    if (!selections) {
+        // Redirect if no selections found
+        window.location.href = 'selection.html';
+        return;
+    }
+
+    const parsedSelections = JSON.parse(selections);
+    console.log("Loaded categorySelections:", parsedSelections);
+
+    Object.entries(parsedSelections).forEach(([categoryKey, items]) => {
+        if (SPENDING_CATEGORIES[categoryKey]) {
+            SPENDING_CATEGORIES[categoryKey].items = items.map(name => {
+                const predefinedItem = SPENDING_CATEGORIES[categoryKey].items.find(item => item.name === name);
+                return predefinedItem || { name, icon: "✨" }; // Use default icon only for custom items
+            });
+        } else {
+            console.warn(`Category ${categoryKey} not found in SPENDING_CATEGORIES!`);
+        }
+    });
+
+    console.log("Updated SPENDING_CATEGORIES:", SPENDING_CATEGORIES);
+
+    // Initialize the game UI
+    updateInterface();
+});
+
+
+
 
 
 const SHOCK_EVENTS = [
