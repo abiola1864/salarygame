@@ -16,6 +16,8 @@
     <div class="stage-dot" data-stage="baseline"></div>
     <div class="stage-dot" data-stage="description_page_lump_sum"></div>
     <div class="stage-dot" data-stage="november_lump"></div>
+
+
     <div class="stage-dot" data-stage="description_page_segregated"></div>
     <div class="stage-dot" data-stage="november_segregated"></div>
     <div class="stage-dot" data-stage="january"></div>
@@ -333,75 +335,66 @@ function updateScenarioAfterShock() {
 
 
 
-
-// Define base salaries for different levels
 const SALARY_LEVELS = {
-   'intern': 150000,
+    'intern': 150000,
     'low': 600000,
     'mid': 950000,
-    'high': 12000000
+    'high': 1200000
 };
 
-// Function to get base salary from localStorage
 function getBaseSalary() {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-    return SALARY_LEVELS[userInfo.level || 'low']; // Default to low if level not found
+    return SALARY_LEVELS[userInfo.level || 'low'];
 }
 
-// Function to calculate stage salary based on percentage of base salary
-function calculateStageSalary(percentage) {
-    const baseSalary = getBaseSalary();
-    return Math.round(baseSalary * (percentage / 100));
+function calculateBonusAmount(baseSalary) {
+    return Math.round(baseSalary * 0.10); // 10% bonus
 }
 
-
-// Salary progression tracker
 const SALARY_PROGRESSION = {
-    baseline: getBaseSalary(), // Initial N110,000
+    baseline: getBaseSalary(), // October baseline
+
+    october: {
+        // Retrospective base salary
+        regular: getBaseSalary(),
+        get total() { return this.regular; }
+    },
 
     november: {
-        // Retrospective base salary (N110,000)
+        // Base salary plus 10% bonus
         regular: getBaseSalary(),
-        get total() { return this.regular; } // N110,000 total
+        bonus: function() {
+            return calculateBonusAmount(this.regular);
+        },
+        get total() { 
+            return this.regular + this.bonus();
+        }
     },
 
     january: {
-        // 1.5x based on November's total (N110,000)
-        get regular() {
-            const novemberTotal = SALARY_PROGRESSION.november.total;
-            return Math.round(novemberTotal * 1.5); // ~N165,000
+        // Same as November but actual behavior
+        regular: getBaseSalary(),
+        bonus: function() {
+            return calculateBonusAmount(this.regular);
         },
-        get total() { return this.regular; } // ~N165,000 total
-    },
-
-    february: {
-        // 2.5x based on January's total (N165,000)
-        get amount() {
-            const januaryTotal = SALARY_PROGRESSION.january.total;
-            return Math.round(januaryTotal * 2.5); // ~N412,500
+        get total() {
+            return this.regular + this.bonus();
         }
     }
 };
 
-      
-      
-      
 const STAGES = {
     'baseline': {
-        title: '📊 November 2024',
+        title: '📊 October 2024',
         description: function() {
             const salary = SALARY_PROGRESSION.baseline.toLocaleString();
-            return `Remember November, my guy! 🌟 That  ₦${salary}  salary came through, and you made it work like a boss! 😅 The month had its ups and downs — stretching those naira notes like chewing gum! 😜 Maybe you skipped that extra suya or opted for the okada over the bus. Random 'emergency' expenses showed up, but you handled them like a pro. 💪 Now, as you look back, it’s all about the lessons and the hustle.  💪 💸`;
-        
-        
+            return `Looking back at October 2024! Your salary was ₦${salary}. This was before any changes or bonuses. Let's see how you managed your expenses during this time! 💪`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const salary = SALARY_PROGRESSION.baseline;
-            return `Chai! 😩 Life just threw you a curveball! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your budget!
+            return `Unexpected expense alert! 😩 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your budget!
 
-Now your ${salary.toLocaleString()} NGN is looking more like ${(salary - shockAmount).toLocaleString()} NGN. Time to put on your financial ninja skills! 🥷
-
-You'll need to adjust your budget to handle this surprise expense. Remember, every naira counts! Let's see how you navigate this challenge. 💪`;
+Your ${salary.toLocaleString()} NGN is now ${(salary - shockAmount).toLocaleString()} NGN. Let's see how you handle this! 💪`;
         },
         get base_salary() { return SALARY_PROGRESSION.baseline; },
         get shock_range() { 
@@ -410,77 +403,81 @@ You'll need to adjust your budget to handle this surprise expense. Remember, eve
         framing: 'regular'
     },
 
-    'description_page_condition_a': {
-        title: '💰 January 2025 Preview',
+    'november_lump': {
+        title: '💰 November 2024 - Salary Increase',
         description: function() {
-            const regular = SALARY_PROGRESSION.january.regular;
-            return `Bam! It's January, and we're stepping into a higher income! 🎉
+            const total = SALARY_PROGRESSION.november.total;
+            return `As part of your annual salary review, we're pleased to announce a one-time increase in your monthly salary to ₦${total.toLocaleString()}. This reflects your base salary plus a 10% increase, which has been incorporated into your regular paycheck. 🎉
 
-This month, you're getting a boosted salary of **${regular.toLocaleString()} NGN**! 🤑
-
-Now, don't get too excited o. Stay grounded. Save some for emergencies — after all, your aunty can still send that "Emergency Alert" message anytime. 😂`;
-        },
-        isDescriptionPage: true
-    },
-
-    'condition_a': {
-        title: '💸 January 2025 - Regular Salary',
-        description: function() {
-            return `Time to manage your regular salary of ${SALARY_PROGRESSION.january.regular.toLocaleString()} NGN!`;
+Consider how this permanent increase to your monthly income might affect your long-term financial planning and essential expenses. 💡`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
-            const regular = SALARY_PROGRESSION.january.regular;
-            return `Eiya! 😧 Life happened! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your regular salary!
+            const total = SALARY_PROGRESSION.november.total;
+            return `Life happens! 😮 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your increased salary!
 
-Your ${regular.toLocaleString()} NGN salary is now ${(regular - shockAmount).toLocaleString()} NGN. Time to adjust your plans! 💪
-
-Show us how you handle this surprise expense. Every naira counts!`;
+Your ${total.toLocaleString()} NGN is now ${(total - shockAmount).toLocaleString()} NGN. How will you adjust your budget? 🤔`;
         },
-        get base_salary() { return SALARY_PROGRESSION.january.regular; },
+        get base_salary() { return SALARY_PROGRESSION.november.total; },
         get shock_range() {
             return [Math.round(this.base_salary * 0.05), Math.round(this.base_salary * 0.1)];
         },
-        framing: 'regular'
+        framing: 'lump_sum'
     },
 
-    'description_page_condition_b': {
-        title: '🎉 February 2025 Preview!',
+    'november_segregated': {
+        title: '🎁 November 2024 - Bonus Payment',
         description: function() {
-            const amount = SALARY_PROGRESSION.february.amount;
-            return `Big win! 🎉
+            const regular = SALARY_PROGRESSION.november.regular;
+            const bonus = SALARY_PROGRESSION.november.bonus();
+            return `Congratulations on your special performance bonus! 🌟
 
-This month, your earnings have skyrocketed to **${amount.toLocaleString()} NGN**! 💰
+Regular Salary: ₦${regular.toLocaleString()}
+Special Bonus: ₦${bonus.toLocaleString()}
 
-It's a reward for all your hard work. Whether you decide to clear bills, splurge on something special, or stash it away for the rainy day, the choice is yours. Enjoy the boost! 🤑`;
-        },
-        isDescriptionPage: true,
-        hasAnimation: true
-    },
-
-    'condition_b': {
-        title: '💰 February 2025 - Lump Sum Salary',
-        description: function() {
-            const amount = SALARY_PROGRESSION.february.amount;
-            return `This month, you're working with a total of **${amount.toLocaleString()} NGN**! 🎉
-
-Time to plan wisely and make the most of this increased earning. Stay sharp and ready for anything! 💪`;
+This bonus is a separate reward for your outstanding work this year! How will you make the most of this extra payment? 🎉`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
-            const amount = SALARY_PROGRESSION.february.amount;
-            return `Whoa! 😮 A surprise expense just hit! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your salary!
+            const regular = SALARY_PROGRESSION.november.regular;
+            const bonus = SALARY_PROGRESSION.november.bonus();
+            return `Surprise expense! 😯 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} to handle!
 
-Now your **${amount.toLocaleString()} NGN** is down to ${(amount - shockAmount).toLocaleString()} NGN. Time to recalculate and adjust!
+Regular Salary: ₦${regular.toLocaleString()}
+Bonus (after expense): ₦${(bonus - shockAmount).toLocaleString()}
 
-Can you still manage with less? Show us how you handle unexpected expenses with this amount! 💸`;
+How will you adjust your plans for this bonus payment? 💭`;
         },
-        get base_salary() { return SALARY_PROGRESSION.february.amount; },
+        get base_salary() { return SALARY_PROGRESSION.november.bonus(); },
         get shock_range() {
-            return [Math.round(this.base_salary * 0.1), Math.round(this.base_salary * 0.15)];
+            return [Math.round(this.base_salary * 0.2), Math.round(this.base_salary * 0.3)];
         },
-        framing: 'regular'
+        framing: 'segregated'
+    },
+
+    'january': {
+        title: '📅 January 2025',
+        description: function() {
+            const regular = SALARY_PROGRESSION.january.regular;
+            const bonus = SALARY_PROGRESSION.january.bonus();
+            return `Welcome to 2025! Let's see how you handle your finances now:
+
+Base Salary: ₦${regular.toLocaleString()}
+Performance Bonus: ₦${bonus.toLocaleString()}
+
+This is real-world behavior time - show us your financial management skills! 💪`;
+        },
+        getPostShockDescription: (shockEvent, shockAmount) => {
+            const total = SALARY_PROGRESSION.january.total;
+            return `Real-world challenge! 🎯 ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} to manage!
+
+Your total of ₦${total.toLocaleString()} NGN is now ₦${(total - shockAmount).toLocaleString()} NGN. How will you handle this in real life? 🤔`;
+        },
+        get base_salary() { return SALARY_PROGRESSION.january.total; },
+        get shock_range() {
+            return [Math.round(this.base_salary * 0.05), Math.round(this.base_salary * 0.1)];
+        },
+        framing: 'actual'
     }
 };
-
       
       
 
@@ -772,18 +769,33 @@ function updateAmount() {
 
 
 function updateStageIndicators() {
-    const stageSequence = Object.keys(STAGES); // Dynamically get all stage keys
-    document.querySelectorAll('.stage-dot').forEach((dot, index) => {
-        const stageName = stageSequence[index];
+    const stageIndicator = document.querySelector('.stage-indicator');
+    if (!stageIndicator) {
+        console.error('Stage indicator not found!');
+        return;
+    }
+
+    // Clear existing stage dots
+    stageIndicator.innerHTML = '';
+
+    // Render dots for filtered `stageSequence`
+    stageSequence.forEach((stageName, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'stage-dot';
         dot.dataset.stage = stageName;
-        dot.classList.toggle('active', stageName === currentStage);
-        dot.classList.toggle(
-            'completed',
-            stageSequence.indexOf(stageName) < stageSequence.indexOf(currentStage)
-        );
+
+        // Add classes based on progress
+        if (stageName === currentStage) {
+            dot.classList.add('active');
+        } else if (index < stageSequence.indexOf(currentStage)) {
+            dot.classList.add('completed');
+        }
+
+        stageIndicator.appendChild(dot);
     });
 }
 
+      
 
 
 
@@ -1059,7 +1071,6 @@ function updateTotalAmount(change) {
 // }
 
 
-
 function updateInterface() {
     resetShockEvent();
 
@@ -1126,10 +1137,12 @@ function updateInterface() {
         document.getElementById('totalEarnings').textContent = '₦0';
     }
 
+    // Update stage indicators dynamically
     updateStageIndicators();
 }
 
-
+      
+      
 
 
 
@@ -1254,6 +1267,36 @@ function proceedToNextStage() {
     }
 }
 
+
+      
+      
+      
+function proceedToNextStage() {
+    // Stop the current timer
+    clearInterval(timerInterval);
+
+    const categorySum = calculateCategoryEarnings(); // Calculate category earnings
+    const speedBonus = timeRemaining > 0 ? 500 : 0; // Apply speed bonus if applicable
+
+    // Display earnings breakdown
+    showEarningsBreakdown(categorySum, speedBonus);
+
+    // Use the filtered `stageSequence` instead of `Object.keys(STAGES)`
+    const currentIndex = stageSequence.indexOf(currentStage);
+
+    if (currentIndex < stageSequence.length - 1) {
+        currentStage = stageSequence[currentIndex + 1];
+
+        updateInterface(); // Update the interface for the new stage
+
+        // Restart the timer for the new stage
+        startTimer();
+    } else {
+        // End of game logic
+        document.getElementById('game-complete').style.display = 'block';
+        alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
+    }
+}
 
 
 
