@@ -396,7 +396,7 @@ const STAGES = {
         title: '',
         description: function() {
             const salary = SALARY_PROGRESSION.baseline.toLocaleString();
-            return `Welcome to January, my guy! 🌟 You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦${salary} to work with! 💪 💸`;
+            return `Welcome to January, my guy! 🌟 You've just received your ₦${salary} salary. Time to make it work! 😅 You know the drill — it's your regular monthly hustle. Sometimes, you'll need to stretch it like chewing gum! 😜 Maybe skip that extra portion of suya or take the okada instead of the bus. Random "emergency" expenses will pop up, but for now, you've got ₦{salary} to work with! 💪 💸`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const salary = SALARY_PROGRESSION.baseline;
@@ -413,63 +413,6 @@ You'll need to adjust your budget to handle this surprise expense. Remember, eve
         framing: 'regular'
     },
 
-    'description_page_condition_a': {
-        title: '💰 March 2025 Preview',
-        description: function() {
-            const regular = SALARY_PROGRESSION.march.regular;
-            const additional = SALARY_PROGRESSION.march.additional;
-            const total = SALARY_PROGRESSION.march.total;
-            return `Bam! It's March, and we're marching into MONEY! 🎉
-
-This month, you're not just getting your usual **${regular.toLocaleString()} NGN** salary. Oh no, you're getting an **extra ${additional.toLocaleString()} NGN**! That's a total of **${total.toLocaleString()} NGN** to juggle for the month. 🤑
-
-But before you start planning to buy everything on Jumia, let's talk. That **extra ${additional.toLocaleString()} NGN** is an **ADDITIONAL PAYMENT** to cushion the economic times! Just a little something from the powers that be to help you survive this month. 💪
-
-Now, don't get too excited o, it's **temporary**! We no sabi how long this extra cash will last. 🙌 So enjoy it while it's here, but stay grounded. Save some for emergencies — after all, your aunty can still send that "Emergency Alert" message anytime. 😂`;
-        },
-        isDescriptionPage: true
-    },
-
-    'condition_a': {
-        title: '💸 March 2025 - Regular Salary',
-        description: function() {
-            return `Time to manage your regular salary of ${SALARY_PROGRESSION.march.regular.toLocaleString()} NGN!`;
-        },
-        getPostShockDescription: (shockEvent, shockAmount) => {
-            const regular = SALARY_PROGRESSION.march.regular;
-            return `Eiya! 😧 Life happened! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} gone from your regular salary!
-
-Your ${regular.toLocaleString()} NGN salary is now ${(regular - shockAmount).toLocaleString()} NGN. Time to adjust your plans! 💪
-
-Show us how you handle this surprise expense. Every naira counts!`;
-        },
-        get base_salary() { return SALARY_PROGRESSION.march.regular; },
-        get shock_range() {
-            return [Math.round(this.base_salary * 0.05), Math.round(this.base_salary * 0.1)];
-        },
-        framing: 'regular'
-    },
-
-    'condition_a_additionalpayment': {
-        title: '💸 March 2025 - Additional Payment',
-        description: function() {
-            const additional = SALARY_PROGRESSION.march.additional;
-            return `Now, let's manage your additional payment of ${additional.toLocaleString()} NGN!`;
-        },
-        getPostShockDescription: (shockEvent, shockAmount) => {
-            const additional = SALARY_PROGRESSION.march.additional;
-            return `Chai! 😩 Another surprise! ${shockEvent.text} That's ₦${shockAmount.toLocaleString()} from your additional payment!
-
-Your ${additional.toLocaleString()} NGN additional payment is now ${(additional - shockAmount).toLocaleString()} NGN. Let's see how you handle this! 💪
-
-Time to show those money management skills!`;
-        },
-        get base_salary() { return SALARY_PROGRESSION.march.additional; },
-        get shock_range() {
-            return [Math.round(this.base_salary * 0.02), Math.round(this.base_salary * 0.05)];
-        },
-        framing: 'regular'
-    },
 
     'description_page_condition_b': {
         title: '🎉 Bonus Time Preview!',
@@ -480,11 +423,11 @@ Time to show those money management skills!`;
             const total = SALARY_PROGRESSION.july.total;
             return `Bam, bam! Big win! 🎉
 
-Remember last month when you were managing **${previousTotal.toLocaleString()} NGN** in total? Well, things just got better! Your earnings is still **${newRegular.toLocaleString()} NGN**, AND you've got a special **meal bonus of ${bonusAmount.toLocaleString()} NGN**! 
+Remember in November,  you were managing **${previousTotal.toLocaleString()} NGN** in total? Well, things just got better! Your earnings is still **${newRegular.toLocaleString()} NGN**, AND you've got a special **transport bonus of ${bonusAmount.toLocaleString()} NGN**! 
 
 That brings your total to **${total.toLocaleString()} NGN** for this month! 💰
 
-It's a **meal bonus** just for you — a reward for all your hustle. Whether you decide to splurge on that special meal, clear bills, or stash it away for the rainy day, the choice is yours.
+It's a **transportation bonus** just for you — a reward for all your hustle. Whether you decide to splurge on that special meal, clear bills, or stash it away for the rainy day, the choice is yours.
 
 Enjoy the boost! 🤑`;
         },
@@ -493,11 +436,11 @@ Enjoy the boost! 🤑`;
     },
 
     'condition_b': {
-        title: '💰 July 2025 - Regular Salary',
+        title: '💰 Jan 2025 - Regular Salary',
         description: function() {
             const previousTotal = SALARY_PROGRESSION.march.total;
             const newRegular = SALARY_PROGRESSION.july.regular;
-            return `Your earnings have increased! From managing a total of ${previousTotal.toLocaleString()} NGN before, now you've got ${newRegular.toLocaleString()} NGN to work with!`;
+            return `As part of your annual salary review, we're pleased to announce a one-time increase in your monthly salary to ₦${total.toLocaleString()}. This reflects your base salary plus a 10% increase, which has been incorporated into your regular paycheck. 🎉`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const regular = SALARY_PROGRESSION.july.regular;
@@ -539,13 +482,7 @@ Let's see how you handle this surprise with your bonus money! 💪`;
         title: '💰 Lump Sum Salary and Bonus',
         description: function() {
             const total = SALARY_PROGRESSION.july.total;
-            return `This month, your salary and bonus are combined into a lump sum of **${total.toLocaleString()} NGN**! 🎉
-
-You're no longer juggling separate payments — this is the full package: your increased earnings and bonus rolled into one. 💰
-
-Enjoy the extra cushion, but be mindful of your spending! With this lump sum, you can still face surprises, so stay ready to adjust if life throws any unexpected expenses your way. 
-
-But for now, it's time to manage your **${total.toLocaleString()} NGN** as one total. Keep your financial skills sharp! 💪`;
+            return `As part of your annual salary review, we're pleased to announce a one-time increase in your monthly salary to ₦${total.toLocaleString()}. This reflects your base salary plus a 10% increase, which has been incorporated into your regular paycheck. 🎉`;
         },
         getPostShockDescription: (shockEvent, shockAmount) => {
             const total = SALARY_PROGRESSION.july.total;
