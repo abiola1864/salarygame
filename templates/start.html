@@ -78,28 +78,15 @@
 
     <script>
         // Game configuration
-     const gameConfig = {
-    groups: {
-        // Group 1: Lump Sum Group
-        1: [
-            'baseline',                    // October 2024 baseline
-            'description_page_lump_sum',   // Description page for November lump sum
-            'november_lump',               // November with lump sum bonus
-            'january',                     // January 2025 actual behavior
-            'congratulations'              // End of game
-        ],
-        
-        // Group 2: Segregated Bonus Group
-        2: [
-            'baseline',                    // October 2024 baseline
-            'description_page_segregated', // Description page for November segregated bonus
-            'november_segregated',         // November with segregated bonus
-            'january',                     // January 2025 actual behavior
-            'congratulations'              // End of game
-        ]
-    }
-};
-      
+   const gameConfig = {
+            groups: {
+                1: ['baseline', 'description_page_condition_a', 'condition_a', 'condition_a_additionalpayment', 
+                    'description_page_condition_b', 'condition_b1', 'condition_c', 'congratulations'],
+                2: ['baseline', 'description_page_condition_a', 'condition_a', 'condition_a_additionalpayment', 
+                    'description_page_condition_b', 'condition_b', 'condition_b_bonus', 'condition_c', 'congratulations']
+            }
+        };
+ 
       
   document.getElementById('startButton').addEventListener('click', async () => {
     console.log("=== Start Button Clicked ===");
