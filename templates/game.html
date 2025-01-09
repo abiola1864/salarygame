@@ -18,6 +18,8 @@
     <div class="stage-dot" data-stage="november_lump"></div>
 
 
+    <!-- Group 2 (Segregated) stages -->
+    <div class="stage-dot" data-stage="baseline"></div>
     <div class="stage-dot" data-stage="description_page_segregated"></div>
     <div class="stage-dot" data-stage="november_segregated"></div>
     <div class="stage-dot" data-stage="january"></div>
@@ -332,7 +334,6 @@ function updateScenarioAfterShock() {
         }
     }
 }
-
 
 
 const SALARY_LEVELS = {
@@ -769,33 +770,18 @@ function updateAmount() {
 
 
 function updateStageIndicators() {
-    const stageIndicator = document.querySelector('.stage-indicator');
-    if (!stageIndicator) {
-        console.error('Stage indicator not found!');
-        return;
-    }
-
-    // Clear existing stage dots
-    stageIndicator.innerHTML = '';
-
-    // Render dots for filtered `stageSequence`
-    stageSequence.forEach((stageName, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'stage-dot';
+    const stageSequence = Object.keys(STAGES); // Dynamically get all stage keys
+    document.querySelectorAll('.stage-dot').forEach((dot, index) => {
+        const stageName = stageSequence[index];
         dot.dataset.stage = stageName;
-
-        // Add classes based on progress
-        if (stageName === currentStage) {
-            dot.classList.add('active');
-        } else if (index < stageSequence.indexOf(currentStage)) {
-            dot.classList.add('completed');
-        }
-
-        stageIndicator.appendChild(dot);
+        dot.classList.toggle('active', stageName === currentStage);
+        dot.classList.toggle(
+            'completed',
+            stageSequence.indexOf(stageName) < stageSequence.indexOf(currentStage)
+        );
     });
 }
 
-      
 
 
 
@@ -1071,6 +1057,7 @@ function updateTotalAmount(change) {
 // }
 
 
+
 function updateInterface() {
     resetShockEvent();
 
@@ -1137,12 +1124,10 @@ function updateInterface() {
         document.getElementById('totalEarnings').textContent = '₦0';
     }
 
-    // Update stage indicators dynamically
     updateStageIndicators();
 }
 
-      
-      
+
 
 
 
@@ -1267,36 +1252,6 @@ function proceedToNextStage() {
     }
 }
 
-
-      
-      
-      
-function proceedToNextStage() {
-    // Stop the current timer
-    clearInterval(timerInterval);
-
-    const categorySum = calculateCategoryEarnings(); // Calculate category earnings
-    const speedBonus = timeRemaining > 0 ? 500 : 0; // Apply speed bonus if applicable
-
-    // Display earnings breakdown
-    showEarningsBreakdown(categorySum, speedBonus);
-
-    // Use the filtered `stageSequence` instead of `Object.keys(STAGES)`
-    const currentIndex = stageSequence.indexOf(currentStage);
-
-    if (currentIndex < stageSequence.length - 1) {
-        currentStage = stageSequence[currentIndex + 1];
-
-        updateInterface(); // Update the interface for the new stage
-
-        // Restart the timer for the new stage
-        startTimer();
-    } else {
-        // End of game logic
-        document.getElementById('game-complete').style.display = 'block';
-        alert(`🎉 Game Over! Your total earnings are ₦${totalEarnings.toLocaleString()}!`);
-    }
-}
 
 
 
